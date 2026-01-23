@@ -22,26 +22,81 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
     description: '',
     priority: 'medium',
     status: 'planned',
+    startDate: null,
+    endDate: null,
   });
+
+  // Helper to format date for input (YYYY-MM-DD)
+  const formatDateForInput = (date: Date | string | null | undefined): string => {
+    if (!date) return '';
+    try {
+      const d = typeof date === 'string' ? new Date(date) : date;
+      if (isNaN(d.getTime())) return '';
+      // Format as YYYY-MM-DD for HTML date input
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Helper to parse date from input
+  const parseDateFromInput = (value: string): Date | null => {
+    if (!value) return null;
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date;
+  };
 
   // Reset form data when dialog opens or initialData changes
   useEffect(() => {
     if (open) {
-      setFormData(initialData || {
-        title: '',
-        author: '',
-        platform: '',
-        platformUrl: '',
-        description: '',
-        priority: 'medium',
-        status: 'planned',
-      });
+      if (initialData) {
+        // When editing, preserve all existing data including dates
+        setFormData({
+          title: initialData.title || '',
+          author: initialData.author || '',
+          platform: initialData.platform || '',
+          platformUrl: initialData.platformUrl || '',
+          description: initialData.description || '',
+          priority: initialData.priority || 'medium',
+          status: initialData.status || 'planned',
+          startDate: initialData.startDate || null,
+          endDate: initialData.endDate || null,
+        });
+      } else {
+        // When creating new, use defaults
+        setFormData({
+          title: '',
+          author: '',
+          platform: '',
+          platformUrl: '',
+          description: '',
+          priority: 'medium',
+          status: 'planned',
+          startDate: null,
+          endDate: null,
+        });
+      }
     }
   }, [open, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    // Clean up the data before submitting
+    const cleanedData = {
+      ...formData,
+      // Convert empty strings to null for optional fields
+      author: formData.author || null,
+      platform: formData.platform || null,
+      platformUrl: formData.platformUrl || null,
+      description: formData.description || null,
+      // Ensure dates are properly handled
+      startDate: formData.startDate || null,
+      endDate: formData.endDate || null,
+    };
+    onSubmit(cleanedData);
     onClose();
   };
 
@@ -125,6 +180,26 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
                   <option value="standby">Standby</option>
                   <option value="planned">Planned</option>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Start Date</label>
+                <Input
+                  type="date"
+                  value={formatDateForInput(formData.startDate)}
+                  onChange={(e) => setFormData({ ...formData, startDate: parseDateFromInput(e.target.value) })}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">End Date Goal</label>
+                <Input
+                  type="date"
+                  value={formatDateForInput(formData.endDate)}
+                  onChange={(e) => setFormData({ ...formData, endDate: parseDateFromInput(e.target.value) })}
+                />
               </div>
             </div>
           </div>

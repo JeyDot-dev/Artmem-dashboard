@@ -9,6 +9,8 @@ export const curriculums = sqliteTable('curriculums', {
   description: text('description'),
   priority: text('priority').notNull().default('medium'),
   status: text('status').notNull().default('planned'),
+  startDate: integer('start_date', { mode: 'timestamp' }),
+  endDate: integer('end_date', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });

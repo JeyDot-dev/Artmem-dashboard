@@ -39,6 +39,8 @@ const createTablesSQL = `
     description TEXT,
     priority TEXT NOT NULL DEFAULT 'medium',
     status TEXT NOT NULL DEFAULT 'planned',
+    start_date INTEGER,
+    end_date INTEGER,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
   );
@@ -67,6 +69,29 @@ const createTablesSQL = `
 `;
 
 sqlite.run(createTablesSQL);
+
+// Migrate existing tables to add date columns if they don't exist
+try {
+  // Check if start_date column exists
+  const tableInfo = sqlite.exec("PRAGMA table_info(curriculums)");
+  if (tableInfo.length > 0 && tableInfo[0].values) {
+    const columns = tableInfo[0].values;
+    const columnNames = columns.map((col: any[]) => col[1] as string);
+    
+    if (!columnNames.includes('start_date')) {
+      sqlite.run('ALTER TABLE curriculums ADD COLUMN start_date INTEGER');
+      console.log('✅ Added start_date column to curriculums table');
+    }
+    
+    if (!columnNames.includes('end_date')) {
+      sqlite.run('ALTER TABLE curriculums ADD COLUMN end_date INTEGER');
+      console.log('✅ Added end_date column to curriculums table');
+    }
+  }
+} catch (error) {
+  // Table might not exist yet, or columns already exist, which is fine
+  console.log('Migration check completed');
+}
 
 // Function to persist database to disk
 export async function saveDatabase(): Promise<void> {

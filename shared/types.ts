@@ -21,6 +21,8 @@ export interface Curriculum {
   description: string | null;
   priority: CurriculumPriority;
   status: CurriculumStatus;
+  startDate: Date | null;
+  endDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,6 +74,8 @@ export interface CurriculumJSON {
   description?: string;
   priority?: CurriculumPriority;
   status?: CurriculumStatus;
+  startDate?: string;
+  endDate?: string;
   sections: SectionJSON[];
 }
 
@@ -97,6 +101,14 @@ export const createCurriculumSchema = z.object({
   description: z.string().nullish(),
   priority: curriculumPrioritySchema.default('medium'),
   status: curriculumStatusSchema.default('planned'),
+  startDate: z.preprocess((val: unknown) => {
+    if (val === null || val === undefined || val === '') return null;
+    return val;
+  }, z.coerce.date().nullable().optional()),
+  endDate: z.preprocess((val: unknown) => {
+    if (val === null || val === undefined || val === '') return null;
+    return val;
+  }, z.coerce.date().nullable().optional()),
 });
 
 export const updateCurriculumSchema = createCurriculumSchema.partial();
@@ -125,6 +137,8 @@ export const curriculumJSONSchema: z.ZodType<CurriculumJSON> = z.object({
   description: z.string().optional(),
   priority: curriculumPrioritySchema.optional(),
   status: curriculumStatusSchema.optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   sections: z.array(z.object({
     title: z.string().min(1),
     description: z.string().optional(),

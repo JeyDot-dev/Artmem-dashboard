@@ -109,6 +109,8 @@ router.post('/curriculums', async (req, res) => {
         author: result.data.author || null,
         platform: result.data.platform || null,
         description: result.data.description || null,
+        startDate: result.data.startDate || null,
+        endDate: result.data.endDate || null,
         createdAt: now,
         updatedAt: now,
       })
@@ -136,10 +138,15 @@ router.patch('/curriculums/:id', async (req, res) => {
       return res.status(400).json({ error: result.error.issues });
     }
 
+    // Filter out undefined values to avoid overwriting with undefined
+    const updateData = Object.fromEntries(
+      Object.entries(result.data).filter(([_, value]) => value !== undefined)
+    );
+
     const updated = await db
       .update(curriculums)
       .set({
-        ...result.data,
+        ...updateData,
         updatedAt: new Date(),
       })
       .where(eq(curriculums.id, id))

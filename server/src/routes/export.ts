@@ -30,6 +30,8 @@ router.post('/import', async (req, res) => {
         description: data.description || null,
         priority: data.priority || 'medium',
         status: data.status || 'planned',
+        startDate: data.startDate ? new Date(data.startDate) : null,
+        endDate: data.endDate ? new Date(data.endDate) : null,
         createdAt: now,
         updatedAt: now,
       })
@@ -117,6 +119,8 @@ router.get('/export/json', async (req, res) => {
           description: curriculum.description || undefined,
           priority: curriculum.priority as any,
           status: curriculum.status as any,
+          startDate: curriculum.startDate ? curriculum.startDate.toISOString() : undefined,
+          endDate: curriculum.endDate ? curriculum.endDate.toISOString() : undefined,
           sections: sectionsWithItems,
         };
       })
@@ -262,6 +266,8 @@ router.get('/export/tora', async (req, res) => {
           description: curriculum.description || undefined,
           priority: curriculum.priority as any,
           status: curriculum.status as any,
+          startDate: curriculum.startDate ? curriculum.startDate.toISOString() : undefined,
+          endDate: curriculum.endDate ? curriculum.endDate.toISOString() : undefined,
           sections: sectionsWithItems,
         };
       })

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Edit, Trash2, Plus, Video, BookOpen, Dumbbell, FileText, Circle } from 'lucide-react';
+import { format } from 'date-fns';
 import { CurriculumDetail, ItemType } from '../../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -97,6 +98,11 @@ export function CurriculumDetailView({
               )}
               {curriculum.description && (
                 <CardDescription className="mt-2">{curriculum.description}</CardDescription>
+              )}
+              {curriculum.endDate && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <span>Goal: {format(typeof curriculum.endDate === 'string' ? new Date(curriculum.endDate) : curriculum.endDate, 'MMM d, yyyy')}</span>
+                </div>
               )}
             </div>
             <div className="flex gap-2">
