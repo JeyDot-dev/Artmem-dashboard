@@ -94,7 +94,7 @@ Artmem Dashboard provides a unified, local-first application that:
 | Create Curriculum | Add new learning curriculum with metadata |
 | Edit Curriculum | Modify title, author, platform, description, dates |
 | Delete Curriculum | Remove curriculum and all associated data |
-| Curriculum Status | Track as Ongoing, Standby, or Planned |
+| Curriculum Status | Track as Ongoing, Standby, Planned, or Wishlist |
 | Priority Levels | Mark as High, Medium, or Low priority |
 | Platform Links | Store URL to original course/material |
 
@@ -144,9 +144,9 @@ Curriculum
 |---------|--------|---------|
 | Export JSON | `.json` | Full backup of all data |
 | Import JSON | `.json` | Restore or share curricula |
-| Export Tora-chan | `.zip` (MD + JSON) | AI-optimized memory pack |
+| Export Tora-chan | `.md` | AI-optimized progress markdown |
 
-#### Tora-chan Memory Pack Format
+#### Tora-chan Progress Report Format
 
 ```markdown
 # Tora-chan Art Study Progress
@@ -185,10 +185,11 @@ Curriculum
 Replace the static welcome message with an interactive dashboard showing all curricula as cards.
 
 **Key Features:**
-- Cards grouped by status (Ongoing → Standby → Planned)
+- Cards grouped by status (Ongoing → Standby → Planned → Wishlist)
 - Sorted by end goal date within each group
 - Visual progress indicators
 - Click to navigate to full view
+- **Note**: Wishlist items appear only on the dashboard, not in the sidebar
 
 ### 5.2 Days Remaining
 
@@ -224,6 +225,127 @@ Click "Go to Task" to scroll and highlight.
 1. Smooth scroll to center item in viewport
 2. 2-second pulsing highlight animation
 3. Automatic fade-out
+
+### 5.5 Dashboard Header Row
+
+A new header row positioned at the top of the dashboard, above the "Ongoing" curriculum section.
+
+**Layout:**
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                          DASHBOARD                                  │
+├────────────────────────────────────────────────────────────────────┤
+│  ┌──────────────────┐          ┌──────────────────────────────┐   │
+│  │    TOOLBOX       │          │    PIXIV INSPIRATION         │   │
+│  │  [Tool] [Tool]   │          │    ┌────────────────────┐    │   │
+│  │  [Tool] [Tool]   │          │    │   Random Daily     │    │   │
+│  └──────────────────┘          │    │   Illustration     │    │   │
+│                                │    └────────────────────┘    │   │
+│                                └──────────────────────────────┘   │
+├────────────────────────────────────────────────────────────────────┤
+│  📊 Ongoing (3)                                                    │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐                              │
+│  │ Card 1  │ │ Card 2  │ │ Card 3  │                              │
+│  └─────────┘ └─────────┘ └─────────┘                              │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+### 5.6 Toolbox Component
+
+A compact "machine/drawer" aesthetic widget providing quick access to frequently used external tools.
+
+**Features:**
+- Displays hardcoded tool icons from configuration file
+- Clicking opens tool URL in new browser tab
+- Minimal, doujin aesthetic matching app theme
+- Easily extensible via `src/config/toolbox.ts`
+
+**Tool Configuration:**
+```typescript
+interface Tool {
+  id: string;
+  name: string;
+  url: string;
+  icon: LucideIcon;
+  description?: string;
+}
+```
+
+### 5.7 Pixiv Inspiration Widget
+
+An inspiration widget that displays random top-ranked illustrations from Pixiv.
+
+**Backend Features:**
+- Authenticated API access via Pixiv Refresh Token
+- Endpoint to fetch Daily Top 15 illustrations
+- Endpoint to bookmark/unbookmark illustrations
+
+**Frontend - Dashboard Card:**
+- Sized to match existing curriculum cards
+- On initial app load: fetches Top 15 and caches in memory
+- On dashboard view: displays random image from cache (no new API call)
+- Each return to dashboard shows a different random image from cache
+- Thumbnail display with subtle hover effect
+- Clicking opens immersive lightbox modal
+
+**Frontend - Lightbox Modal:**
+- Full-screen overlay with blurred backdrop
+- High-resolution image display
+- Bookmark button shows current state (filled = bookmarked, outline = not bookmarked)
+- Clicking bookmark toggles state and updates both API and local cache
+- Click outside or press ESC to close
+
+**Caching Strategy:**
+- Fetch once on app initialization, store in TanStack Query cache
+- `staleTime: Infinity` to prevent automatic refetches
+- Manual refresh button (optional) to force new fetch
+- Cache persists for entire browser session
+
+### 5.8 Dashboard Search Filter
+
+A simple searchbar to filter curriculums displayed on the dashboard.
+
+**Location:**
+- Dashboard view, positioned below the header and above the status sections
+- Compact, minimal design matching the app aesthetic
+
+**Search Behavior:**
+- Searches simultaneously across three fields: `title`, `author`, `platform`
+- **AND logic**: All words typed must appear somewhere in the combined searchable text
+- Case-insensitive matching
+- Real-time filtering as user types (no submit button needed)
+- Empty search shows all curriculums
+
+**Search Algorithm:**
+```
+1. User types: "drawabox beginner"
+2. Split into words: ["drawabox", "beginner"]
+3. For each curriculum, create searchable text:
+   - Combine: `${title} ${author || ''} ${platform || ''}`
+   - Lowercase the combined text
+4. Filter: Keep curriculum if ALL words appear in the searchable text
+5. Display filtered curriculums in their respective status sections
+```
+
+**Example:**
+| Search Query | Curriculum | Match? |
+|--------------|------------|--------|
+| `drawabox` | Title: "Drawabox Lessons", Author: "Irshad", Platform: "Drawabox" | ✓ Yes |
+| `drawabox irshad` | Title: "Drawabox Lessons", Author: "Irshad", Platform: "Drawabox" | ✓ Yes |
+| `drawabox youtube` | Title: "Drawabox Lessons", Author: "Irshad", Platform: "Drawabox" | ✗ No |
+| `figure drawing` | Title: "Figure Drawing Fundamentals", Author: "Proko", Platform: "YouTube" | ✓ Yes |
+
+**UI Specifications:**
+- Input with search icon (lucide-react `Search` icon)
+- Placeholder text: "Filter by title, author, platform..."
+- Optional clear button when text is present (`X` icon)
+- Subtle border, minimal padding
+- Filter persists until cleared (not reset on navigation within dashboard)
+
+**Edge Cases:**
+- If all curriculums are filtered out, show a "No matching curriculums" message
+- Empty/whitespace-only search treated as no filter
+- Handles null `author` and `platform` gracefully (treated as empty string)
 
 ---
 
@@ -266,6 +388,27 @@ Click "Go to Task" to scroll and highlight.
 | US-16 | As a user, I want to click a card to open the full curriculum view | P1 |
 | US-17 | As a user, I want to jump to my current task from the curriculum view | P2 |
 
+### Epic: Dashboard Header Row (V3)
+
+| ID | Story | Priority |
+|----|-------|----------|
+| US-18 | As a user, I want quick access to my frequently used tools from the dashboard | P2 |
+| US-19 | As a user, I want to click a tool icon to open it in a new tab | P2 |
+| US-20 | As a user, I want to see inspiring artwork on my dashboard to stay motivated | P2 |
+| US-21 | As a user, I want to view random top Pixiv illustrations without excessive API calls | P2 |
+| US-22 | As a user, I want to expand an illustration to full-screen for better viewing | P2 |
+| US-23 | As a user, I want to bookmark/unbookmark illustrations and see the current bookmark state | P2 |
+| US-24 | As a user, I want to see a different random illustration each time I return to the dashboard | P2 |
+
+### Epic: Dashboard Search Filter
+
+| ID | Story | Priority |
+|----|-------|----------|
+| US-25 | As a user, I want to filter dashboard curriculums by typing keywords so I can quickly find specific courses | P1 |
+| US-26 | As a user, I want the search to check title, author, and platform simultaneously so I don't need to remember exact field values | P1 |
+| US-27 | As a user, I want to type multiple words to narrow down results (AND logic) so I can be more specific | P1 |
+| US-28 | As a user, I want to see a clear indication when no curriculums match my search | P2 |
+
 ---
 
 ## 7. Information Architecture
@@ -283,7 +426,7 @@ Click "Go to Task" to scroll and highlight.
 │ platformUrl: string | null                                   │
 │ description: string | null                                   │
 │ priority: 'high' | 'medium' | 'low'                         │
-│ status: 'ongoing' | 'standby' | 'planned'                   │
+│ status: 'ongoing' | 'standby' | 'planned' | 'wishlist'     │
 │ startDate: Date | null                                       │
 │ endDate: Date | null                                         │
 │ createdAt: Date                                              │
@@ -432,7 +575,7 @@ The following features are explicitly **not planned**:
 | Curriculum | A complete learning course or study plan |
 | Section | A grouping of related items within a curriculum |
 | Item | An individual task or learning unit |
-| Status (Curriculum) | Ongoing, Standby, or Planned |
+| Status (Curriculum) | Ongoing, Standby, Planned, or Wishlist |
 | Status (Item) | Not Started, In Progress, or Completed |
 | Tora-chan | AI study companion persona |
 | Memory Pack | AI-optimized export format |
@@ -444,7 +587,9 @@ The following features are explicitly **not planned**:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | Initial | Core curriculum management, progress tracking |
-| 2.0 | Planned | Dashboard view, days remaining, current task widget |
+| 2.0 | Completed | Dashboard view, days remaining, current task widget |
+| 3.0 | Completed | Dashboard header row, Toolbox widget, Pixiv inspiration widget |
+| 3.1 | Completed | Dashboard search filter (title, author, platform) |
 
 ---
 

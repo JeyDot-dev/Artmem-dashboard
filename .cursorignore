@@ -24,9 +24,6 @@ build/
 server/data/
 
 # Dependencies and lock files
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
 
 # Build outputs
 *.tsbuildinfo

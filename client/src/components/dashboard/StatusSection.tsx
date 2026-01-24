@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, TrendingUp, Pause, ClipboardList } from 'lucide-react';
+import { ChevronDown, ChevronRight, TrendingUp, Pause, ClipboardList, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { CurriculumStatus } from '../../../../shared/types';
 
@@ -22,6 +22,10 @@ const statusConfig = {
   planned: {
     icon: ClipboardList,
     label: 'Planned',
+  },
+  wishlist: {
+    icon: Star,
+    label: 'Wishlist',
   },
 };
 

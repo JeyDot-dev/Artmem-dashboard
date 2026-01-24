@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { eq } from 'drizzle-orm';
-import archiver from 'archiver';
 import { format } from 'date-fns';
 import { db, scheduleSave } from '../db/index.js';
 import { curriculums, sections, items } from '../db/schema.js';
-import { curriculumJSONSchema, CurriculumJSON } from '../../../shared/types.js';
+import { curriculumJSONSchema } from '../../../shared/types.js';
 
 const router = Router();
 
@@ -135,7 +134,7 @@ router.get('/export/json', async (req, res) => {
   }
 });
 
-// GET /api/export/tora - Generate Tora-chan Memory Pack
+// GET /api/export/tora - Export Tora-chan Markdown Progress Report
 router.get('/export/tora', async (req, res) => {
   try {
     const allCurriculums = await db.select().from(curriculums);
@@ -200,6 +199,11 @@ router.get('/export/tora', async (req, res) => {
 
       for (const curriculum of standbyCurriculums) {
         markdown += `### ${curriculum.title}\n`;
+        if (curriculum.author) markdown += `**Author:** ${curriculum.author}`;
+        if (curriculum.platform) {
+          markdown += ` | **Platform:** ${curriculum.platformUrl ? `[${curriculum.platform}](${curriculum.platformUrl})` : curriculum.platform}`;
+        }
+        if (curriculum.author || curriculum.platform) markdown += `\n`;
         if (curriculum.description) markdown += `${curriculum.description}\n\n`;
         else markdown += `Currently on hold.\n\n`;
 
@@ -223,69 +227,62 @@ router.get('/export/tora', async (req, res) => {
 
       for (const curriculum of plannedCurriculums) {
         markdown += `### ${curriculum.title}\n`;
+        if (curriculum.author) markdown += `**Author:** ${curriculum.author}`;
+        if (curriculum.platform) {
+          markdown += ` | **Platform:** ${curriculum.platformUrl ? `[${curriculum.platform}](${curriculum.platformUrl})` : curriculum.platform}`;
+        }
+        if (curriculum.author || curriculum.platform) markdown += `\n`;
         if (curriculum.description) markdown += `${curriculum.description}\n\n`;
         else markdown += `Not yet started.\n\n`;
-      }
-    }
 
-    // Generate full JSON export
-    const exportData: CurriculumJSON[] = await Promise.all(
-      allCurriculums.map(async (curriculum) => {
         const curriculumSections = await db
           .select()
           .from(sections)
           .where(eq(sections.curriculumId, curriculum.id))
           .orderBy(sections.sortOrder);
 
-        const sectionsWithItems = await Promise.all(
-          curriculumSections.map(async (section) => {
-            const sectionItems = await db
-              .select()
-              .from(items)
-              .where(eq(items.sectionId, section.id))
-              .orderBy(items.sortOrder);
+        if (curriculumSections.length > 0) {
+          markdown += `**Sections:** ${curriculumSections.map((s) => s.title).join(', ')}\n\n`;
+        }
+        markdown += `---\n\n`;
+      }
+    }
 
-            return {
-              title: section.title,
-              description: section.description || undefined,
-              items: sectionItems.map((item) => ({
-                title: item.title,
-                description: item.description || undefined,
-                type: item.type as any,
-                status: item.status as any,
-              })),
-            };
-          })
-        );
+    // Wishlist curriculums - minimal detail
+    const wishlistCurriculums = allCurriculums.filter((c) => c.status === 'wishlist');
+    if (wishlistCurriculums.length > 0) {
+      markdown += `## Wishlist\n\n`;
 
-        return {
-          title: curriculum.title,
-          author: curriculum.author || undefined,
-          platform: curriculum.platform || undefined,
-          platformUrl: curriculum.platformUrl || undefined,
-          description: curriculum.description || undefined,
-          priority: curriculum.priority as any,
-          status: curriculum.status as any,
-          startDate: curriculum.startDate ? curriculum.startDate.toISOString() : undefined,
-          endDate: curriculum.endDate ? curriculum.endDate.toISOString() : undefined,
-          sections: sectionsWithItems,
-        };
-      })
-    );
+      for (const curriculum of wishlistCurriculums) {
+        markdown += `### ${curriculum.title}\n`;
+        if (curriculum.author) markdown += `**Author:** ${curriculum.author}`;
+        if (curriculum.platform) {
+          markdown += ` | **Platform:** ${curriculum.platformUrl ? `[${curriculum.platform}](${curriculum.platformUrl})` : curriculum.platform}`;
+        }
+        if (curriculum.author || curriculum.platform) markdown += `\n`;
+        if (curriculum.description) markdown += `${curriculum.description}\n\n`;
+        else markdown += `Wishlist item.\n\n`;
 
-    // Create ZIP archive
-    const archive = archiver('zip', { zlib: { level: 9 } });
+        const curriculumSections = await db
+          .select()
+          .from(sections)
+          .where(eq(sections.curriculumId, curriculum.id))
+          .orderBy(sections.sortOrder);
+
+        if (curriculumSections.length > 0) {
+          markdown += `**Sections:** ${curriculumSections.map((s) => s.title).join(', ')}\n\n`;
+        }
+        markdown += `---\n\n`;
+      }
+    }
+
+    // Export as plain text markdown file
     const timestamp = format(new Date(), 'yyyy-MM-dd');
-
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="tora-memory-pack-${timestamp}.zip"`);
-
-    archive.pipe(res);
-    archive.append(markdown, { name: 'ToraCoursesDashboard.md' });
-    archive.append(JSON.stringify(exportData, null, 2), { name: `tora-full-backup-${timestamp}.json` });
-    await archive.finalize();
+    res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="tora-progress-${timestamp}.md"`);
+    res.send(markdown);
   } catch (error) {
-    console.error('Failed to export Tora pack:', error);
+    console.error('Failed to export Tora markdown:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

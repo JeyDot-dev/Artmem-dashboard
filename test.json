@@ -1,418 +1,170 @@
 {
-    "title": "Figure Drawing Fundamentals",
-    "author": "Stan Prokopenko",
-    "platform": "Proko",
-    "platformUrl": "https://www.proko.com/course/figure-drawing-fundamentals",
-    "description": "A comprehensive course on drawing the human figure covering gesture, structure, mannequinization, shading, and more.",
-    "priority": "high",
-    "status": "ongoing",
-    "sections": [
-        {
-            "title": "Gesture",
-            "items": [
-                {
-                    "title": "How to Draw Gesture",
-                    "description": "Gesture is one of the most important principles to understand when drawing the figure. It's not the contour, or the form, or the tone. It's the movement th",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "How to Draw Gesture – Step by Step",
-                    "description": "Let’s take a look at some model poses and draw examples and find their gestures.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Quicksketch Assignment Examples - 2 Minute Poses",
-                    "description": "Quicksketch examples for drawing gestures",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Quicksketch Assignment Examples - 30 Second Poses",
-                    "description": "30 second gesture quicksketch demonstrations.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Figure Drawing Critiques - Gesture",
-                    "description": "Critiques of student gesture drawings with Stan Prokopenko and Marshall Vandruff.",
-                    "type": "video",
-                    "status": "completed"
-                }
-            ]
-        },
-        {
-            "title": "The Bean",
-            "items": [
-                {
-                    "title": "How to Simplify the Motion of the Torso – The Bean",
-                    "description": "There are 3 major masses connected by the spine. Head, rib cage and pelvis.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Bean Examples – Tilt, Lean, Twist and Foreshortening",
-                    "description": "Examples of how to draw the bean.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Bean Assignment Examples – Tilt and Lean",
-                    "description": "Bean Assignment Examples",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Bean Assignment Examples – Twist",
-                    "description": "Bean assignment examples.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Bean Assignment Examples – Foreshortening",
-                    "description": "Bean Assignment Examples",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Figure Drawing Critiques – The Bean",
-                    "description": "Marshall Vandruff and Stan Prokopenko critique students’ drawings based on the Bean lesson.",
-                    "type": "video",
-                    "status": "completed"
-                }
-            ]
-        },
-        {
-            "title": "Structure",
-            "items": [
-                {
-                    "title": "Structure Basics – Making Things Look 3D",
-                    "description": "You can simplify pretty much any organic object into sphere, cylinders and cubes or a combination of these three forms. In this episode I explain when and",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Figure Drawing Critiques – Structure Basics",
-                    "description": "Marshall Vandruff and Stan Prokopenko critique students' drawings based on the Structure Basics Video",
-                    "type": "video",
-                    "status": "completed"
-                }
-            ]
-        },
-        {
-            "title": "Landmarks",
-            "items": [
-                {
-                    "title": "Landmarks of the Human Body",
-                    "description": "Landmarks on the body are areas where the bone is at the surface. The landmarks are used to find forms and to measure proportion.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Landmarks Assignment Example 1: Back",
-                    "description": "A premium example of applying landmarks to your drawing.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Landmarks Assignment Example 2: Front",
-                    "description": "A premium example of applying landmarks to your drawing.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Landmarks Assignment Example 3 - Step by Step",
-                    "description": "A step by step example of applying landmarks to your drawing.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Landmarks Assignment Example 4: Extreme Scapula Position",
-                    "description": "A premium example of applying landmarks to your drawing.",
-                    "type": "video",
-                    "status": "completed"
-                },
-                {
-                    "title": "Figure Drawing Critiques 4 – Landmarks",
-                    "description": "Marshall Vandruff and Stan Prokopenko critique students' drawings based on the landmarks lesson.",
-                    "type": "video",
-                    "status": "in_progress"
-                }
-            ]
-        },
-        {
-            "title": "Robo Bean",
-            "items": [
-                {
-                    "title": "How to Draw Structure in the Body – Robo Bean",
-                    "description": "How to Draw Structure in the Body – Robo Bean",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Robo Bean Assignment Example – Step by Step",
-                    "description": "Robo Bean Examples – Step by Step.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Robo Bean Assignment Examples - Lean",
-                    "description": "Premium Assignment Examples of the Robo Bean Leaning",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Robo Bean Assignment Examples - Tilt",
-                    "description": "Premium Assignment Examples of the Robo Bean Tilting...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Robo Bean Assignment Examples - Twist",
-                    "description": "Premium Assignment Examples of the Robo Bean Twisting...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Robo Bean Assignment Examples - Foreshortening",
-                    "description": "Premium Assignment Examples of the Robo Bean Foreshortening.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Figure Drawing Critiques – Robo Bean",
-                    "description": "Marshall Vandruff and Stan Prokopenko critique student's Robo Bean drawings.",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Mannequinization",
-            "items": [
-                {
-                    "title": "Mannequinization – Structure of the Human Body",
-                    "description": "Learn to draw the figure as a mannequin to give your drawings volume and perspective and to help invent poses from your imagination.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Mannequinization Assignment Example 1",
-                    "description": "First example of mannequinization. Drawing the human figure with a focus on structure.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Mannequinization Assignment Example 2",
-                    "description": "Second example of mannequinization. Drawing the human figure with a focus on structure.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Mannequinization Assignment Example 3",
-                    "description": "Third example of mannequinization. Drawing the human figure with a focus on structure.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Mannequinization Assignment Examples - Front View",
-                    "description": "Assignment Examples: Mannequinization of the figure from the front.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Mannequinization Assignment Examples - Back View",
-                    "description": "Assignment Examples: Mannequinization of the figure from the back.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Figure Drawing Critiques – Mannequinization",
-                    "description": "Marshall Vandruff and Stan Prokopenko critique students' mannequinization drawings.",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Balance",
-            "items": [
-                {
-                    "title": "How to Draw Balanced Poses",
-                    "description": "How to make your figure drawings feel balanced. Or break that balance to create action poses!",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Exaggeration",
-            "items": [
-                {
-                    "title": "How to Draw Exaggerated Poses",
-                    "description": "How to Draw Exaggerated Poses",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Real Time Exaggeration Step by Step",
-                    "description": "Real-time Demo: Exaggeration – Step by Step",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Proportions",
-            "items": [
-                {
-                    "title": "Human Proportions – Average Figure",
-                    "description": "Dr. Paul Richer, a pioneer in human anatomy says there are two reasons why artists study human proportions",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Human Proportions – Cranial Units",
-                    "description": "Human Proportions – Cranial Units",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Human Proportions – Idealistic Figures",
-                    "description": "Human Proportions – Idealistic Figures",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Measuring",
-            "items": [
-                {
-                    "title": "Measuring Techniques",
-                    "description": "Measuring Techniques",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "How to Practice and Check Your Measuring",
-                    "description": "Learn how to practice and check your measuring when you're drawing.",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Shading",
-            "items": [
-                {
-                    "title": "Drawing Supplies I Use in My Videos",
-                    "description": "Supplies Overview...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Shading Light and Form – Basics",
-                    "description": "Shading Light and Form – Basics...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "The Basic Elements – Shape, Value, Color, Edge",
-                    "description": "The Basic Elements – Shape, Value, Color, Edge",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "How to Hold and Control Your Pencil",
-                    "description": "In this video you'll learn about the \"Tripod Grip\", \"Overhand Grip\", using your wrist vs. your shoulder, and how to use various parts of the pencil to control line weight.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Drawing Supplies I Use for Longer Drawings",
-                    "description": "Drawing Supplies I Use for Longer Drawings...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "How to Shade a Drawing",
-                    "description": "How to Shade a Drawing...",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Figure Drawing Demo",
-            "items": [
-                {
-                    "title": "Yoni Figure Drawing Timelapse",
-                    "description": "A time-lapse of a Figure Drawing Demonstration.",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Linear Layin – Basic Shapes",
-                    "description": "Drawing Yoni – Linear Layin – Basic Shapes",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Linear Layin – Anatomical Forms",
-                    "description": "Linear Layin – Anatomical Forms...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Linear Layin – Shadow Mapping",
-                    "description": "Linear Layin – Shadow Mapping",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Shading – General Tonal Composition",
-                    "description": "Shading – General Tonal Composition...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Shading – Upper Body Details",
-                    "description": "Shading – Upper Body Details...",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Shading – Leg Details",
-                    "description": "Shading – Leg Details",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Shading – Background and Final Touches",
-                    "description": "Shading – Background and Final Touches",
-                    "type": "video",
-                    "status": "not_started"
-                },
-                {
-                    "title": "Figure Drawing Shading Critique",
-                    "description": "Figure Drawing Shading Critique",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        },
-        {
-            "title": "Closing Thoughts",
-            "items": [
-                {
-                    "title": "Closing Thoughts",
-                    "description": "Closing Thoughts",
-                    "type": "video",
-                    "status": "not_started"
-                }
-            ]
-        }
-    ]
+"title": "Bring Your Illustrations to Life: 2D Animation with AE",
+"author": "MiuA",
+"platform": "Coloso",
+"status": "planned",
+"sections": [
+{
+"title": "Section 01: Hello, I'm Miu!",
+"items": [
+{
+"title": "01. Orientation",
+"description": "Introducing your instructor. What you will learn (important notes, the techniques, class levels). Preparation advice (mandatory and optional software and device). Quick preview for the workflow. Goals.",
+"type": "video",
+"status": "not_started"
+}
+]
+},
+{
+"title": "Section 02: First Things First: Let's Start Drawing!",
+"items": [
+{
+"title": "02. Visualize Your Idea",
+"description": "Making thumbnail based on your rough idea. Break down the movement.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "03. Assets Drawing: Introduction",
+"description": "Comparison of asset separation techniques. Guide to preparing efficient sketch. Deciding which part to separate.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "04. Assets Drawing (Part 1)",
+"description": "Drawing lineart based on the tidy sketch (character's body and accessories). Prepare base color for each lineart (character's body and accessories).",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "05. Assets Drawing (Part 2)",
+"description": "Tips on how to make the assets look seamless and connected. Coloring each asset (character's body and accessories).",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "06. Assets Drawing (Part 3)",
+"description": "Drawing lineart based on the tidy sketch (hand and the rest of accessories). Preparing base color for each lineart (hand and the rest of accessories). Coloring each asset (hand and the rest of accessories). Final color retouch.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "07. Reviewing the Assets",
+"description": "Reviewing what we have illustrated. Homework: Try developing your own style.",
+"type": "homework",
+"status": "not_started"
+}
+]
+},
+{
+"title": "Section 03: Time to Get Ready: Prep Everything We'll Need",
+"items": [
+{
+"title": "08. The Importance of Assets Preparation",
+"description": "Moving the illustration file to your laptop. Learn 8 things to do in assets preparation and the reason. Introduction to After Effect (importing files, layout panel, composition). Explain how assets preparation affect our animation files.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "09. Organizing Your Assets",
+"description": "Apply \"8 things to do in assets preparation\" to our previously made character files.",
+"type": "video",
+"status": "not_started"
+}
+]
+},
+{
+"title": "Section 04: For Beginners: Learn the Basics, It's the Foundation!",
+"items": [
+{
+"title": "10. Basic After Effect Explanation (Part 1)",
+"description": "Deciding duration and FPS. What is transform and keyframe. Adjusting keyframe speed (graph editor) and path lane (keyframe interpolation). Hiding object (visibility and shy toggle). Blending modes. Activating 3D layers. Masking (pen tool, preserving underlying opacity, track matte). What is parenting. Crop and collapsing composition. How renaming and changing footage location on your PC/laptop impact the AE files.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "11. Basic After Effect Explanation (Part 2)",
+"description": "How to find and apply effect & preset to our layer. 2 out of 12 principals of animation (squash and stretch, overlapping and followthrough). 6 Distortion tools (puppet, CC bend it, mesh warp, liquify, turbulent displace, corner pin). Deciding when to use the deformer type in the most efficient way. New task! Practicing on your own.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "12. 3D Illusion Using 2D Images & Parallax Animation",
+"description": "5 important things to make a fake 3D effect (parallax, silhouette, topology, perspective, lighting and shading). Adding dimension to a character (making 3/4 view, leaning forward, and backward position).",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "13. Animation Part 1: Preparation",
+"description": "Open AE files. Set FPS and duration. Importing PSD files. Edit composition bound box. Uncheck every composition collapse toggle. Adjusting anchor point. Activating track matter, 3D layer, and collapse composition. Set layer parenting. Arrange assets rotation, position, and shape to match the sketch guide.",
+"type": "video",
+"status": "not_started"
+}
+]
+},
+{
+"title": "Section 05: Let's Level Up: Dive into Complex Animation!",
+"items": [
+{
+"title": "14. Animation Part 2: Making Main Keypose",
+"description": "Start deforming the assets in detail. Giving dimension to head and body parts. Add parallax movement and depth to the hand and finger. Giving dimension on accessories (glasses and wings). What is Null?",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "15. Animation Part 3: Adding More Keypose and Arrange the Timing",
+"description": "How to make new keyposes from our 2 previously-made keyposes. Adding more keypose, before and after the main keypose to enhance the results. Arrange the keypose timing and adjust other composition to match it. Add color reflection to the glasses.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "16. Animation Part 4: Eyes and Mouth",
+"description": "Animate eyes blink. Animate mouth open and closing.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "17. Animation Part 5: Adding Overlapping and Followthrough Effect",
+"description": "Adding overlapping and followthrough effect on body, hand, finger, hair, chin, earrings, and wings. Make dangling motion to earrings. When to use easy-ease and auto-bezier in graph editor.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "18. Animation Part 6: Giving Reflection and Shine Effect",
+"description": "Adding overlapping and followthrough effect on the halo. Adding color shift effect on halo. Using turbulent noise to add texture. Adding glittery texture to object. Making flickering light effect. Making the keyframe to looping.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "19. Animation Part 7: Final Touch",
+"description": "Make a chain rotation pattern. Add focus and bluring. Make background parallax movement. Time remapping.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "20. Rendering",
+"description": "Brief explanation of some video files. Step by step rendering. New task! Practicing on your own.",
+"type": "video",
+"status": "not_started"
+}
+]
+},
+{
+"title": "Section 06: Wrapping It Up: Closure and Bonus",
+"items": [
+{
+"title": "21. What to Do in the Animation Field",
+"description": "Closure words. Talking about mindset. How to gain profit using your animation ability.",
+"type": "video",
+"status": "not_started"
+},
+{
+"title": "22. Practice Making Illusion of 3D on Several Objects!",
+"description": "Rotation on fan. Rotation on lolipop. Rotation on drink can. Rotation on wind chimes.",
+"type": "exercise",
+"status": "not_started"
+}
+]
+}
+]
 }

@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import curriculumsRouter from './routes/curriculums.js';
 import sectionsRouter from './routes/sections.js';
 import itemsRouter from './routes/items.js';
 import exportRouter from './routes/export.js';
+import pixivRouter from './routes/pixiv.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +24,7 @@ app.use('/api', curriculumsRouter);
 app.use('/api', sectionsRouter);
 app.use('/api', itemsRouter);
 app.use('/api', exportRouter);
+app.use('/api', pixivRouter);
 
 // Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

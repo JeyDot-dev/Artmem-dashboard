@@ -29,9 +29,18 @@ artmem-dashboard/
 │   │   ├── components/
 │   │   │   ├── common/        # Shared components (ImportDropzone)
 │   │   │   ├── curriculum/    # Curriculum-related components
-│   │   │   ├── dashboard/     # Dashboard components (V2)
+│   │   │   ├── dashboard/     # Dashboard components (V2/V3)
+│   │   │   │   ├── Dashboard.tsx
+│   │   │   │   ├── CurriculumCard.tsx
+│   │   │   │   ├── StatusSection.tsx
+│   │   │   │   ├── DaysRemaining.tsx
+│   │   │   │   ├── DashboardSearchBar.tsx  # V3.1: Search filter input
+│   │   │   │   ├── Toolbox.tsx         # V3: Tool launcher widget
+│   │   │   │   └── PixivWidget.tsx     # V3: Pixiv inspiration widget
 │   │   │   ├── layout/        # Header, Sidebar
 │   │   │   └── ui/            # shadcn/ui primitives
+│   │   ├── config/
+│   │   │   └── toolbox.ts     # V3: Hardcoded tool configurations
 │   │   ├── lib/
 │   │   │   ├── api.ts         # API client functions
 │   │   │   └── utils.ts       # Utility functions (cn, etc.)
@@ -46,12 +55,16 @@ artmem-dashboard/
 │   │   ├── db/
 │   │   │   ├── index.ts       # Database connection, sql.js setup
 │   │   │   └── schema.ts      # Drizzle schema definitions
+│   │   ├── lib/
+│   │   │   └── pixiv.ts       # V3: Pixiv API client wrapper
 │   │   ├── routes/
 │   │   │   ├── curriculums.ts # Curriculum CRUD endpoints
 │   │   │   ├── sections.ts    # Section CRUD endpoints
 │   │   │   ├── items.ts       # Item CRUD endpoints
-│   │   │   └── export.ts      # JSON/Tora export endpoints
+│   │   │   ├── export.ts      # JSON/Tora export endpoints
+│   │   │   └── pixiv.ts       # V3: Pixiv API proxy routes
 │   │   └── index.ts           # Server entry point
+│   ├── .env                   # Environment variables (gitignored)
 │   └── package.json
 │
 ├── shared/                    # Shared between client/server
@@ -60,6 +73,7 @@ artmem-dashboard/
 │
 ├── docs/                      # Documentation
 │   ├── PRD.md                 # Product Requirements Document
+│   ├── TECH.md                # Technical Stack & Architecture
 │   └── V2-FEATURES.md         # V2 Feature Specification
 │
 ├── AGENTS.md                  # This file
@@ -78,7 +92,7 @@ artmem-dashboard/
 
 #### Icons
 - **Always use lucide-react icons** - NEVER use emojis or emoticons
-- Dashboard section icons: `TrendingUp` (Ongoing), `Pause` (Standby), `ClipboardList` (Planned)
+- Dashboard section icons: `TrendingUp` (Ongoing), `Pause` (Standby), `ClipboardList` (Planned), `Star` (Wishlist)
 - Task status icons: `Play` (in-progress), `Square` (not-started), `CheckCircle2` (completed)
 - Priority badge icon: `Zap` (lightning bolt)
 - Goal date icon: `Target` (crosshair)
@@ -250,6 +264,26 @@ Main application orchestrator:
 - Renders Sidebar, Header, and main content area
 - Form dialogs for create/edit operations
 
+### Sidebar Component (`client/src/components/layout/Sidebar.tsx`)
+
+Navigation sidebar with curriculum list:
+
+- Groups curriculums by status: **Ongoing, Standby, Planned only**
+- **Important**: Wishlist items are excluded from the sidebar
+- Wishlist curriculums appear only on the Dashboard view
+- Collapsible sidebar with mini-mode
+- Shows curriculum title, platform, and progress percentage
+
+```typescript
+// Sidebar status groups - Wishlist intentionally excluded
+const statusGroups: { status: CurriculumStatus; label: string }[] = [
+  { status: 'ongoing', label: 'Ongoing' },
+  { status: 'standby', label: 'Standby' },
+  { status: 'planned', label: 'Planned' },
+  // wishlist is NOT included here - appears only on Dashboard
+];
+```
+
 ---
 
 ## Common Tasks
@@ -359,6 +393,125 @@ function scrollToItem(itemId: number): void
 
 ---
 
+## V3 Implementation Notes
+
+When implementing V3 features (Dashboard Header Row), refer to `docs/TECH.md` for technical specifications.
+
+### Key V3 Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `Toolbox` | `components/dashboard/Toolbox.tsx` | Tool launcher widget |
+| `PixivWidget` | `components/dashboard/PixivWidget.tsx` | Pixiv inspiration card |
+| `PixivLightbox` | `components/dashboard/PixivLightbox.tsx` | Full-screen image viewer |
+| `DashboardHeaderRow` | `components/dashboard/DashboardHeaderRow.tsx` | Container for Toolbox + Pixiv |
+
+### V3 Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `client/src/config/toolbox.ts` | Hardcoded tool configurations |
+| `server/.env` | Pixiv refresh token (gitignored) |
+| `server/.env.example` | Template for environment variables |
+
+### V3 Backend Files
+
+| File | Purpose |
+|------|---------|
+| `server/src/lib/pixiv.ts` | Pixiv API client wrapper |
+| `server/src/routes/pixiv.ts` | Pixiv proxy API routes |
+
+### V3 Type Additions
+
+Add to `shared/types.ts`:
+
+```typescript
+// Pixiv illustration data
+interface PixivIllustration {
+  id: number;
+  title: string;
+  imageUrls: { squareMedium: string; medium: string; large: string };
+  user: { id: number; name: string };
+  isBookmarked: boolean;  // IMPORTANT: Used for bookmark button state
+}
+
+// Tool configuration
+interface Tool {
+  id: string;
+  name: string;
+  url: string;
+  icon: LucideIcon;
+  description?: string;
+}
+```
+
+### V3 Caching Strategy
+
+**Critical**: Minimize Pixiv API requests:
+
+```typescript
+// Query config for Pixiv data - fetch ONCE per session
+{
+  staleTime: Infinity,
+  gcTime: Infinity,
+  refetchOnMount: false,
+  refetchOnWindowFocus: false,
+}
+```
+
+**Behavior:**
+- Fetch Top 15 once on app initialization
+- Cache in TanStack Query for entire session
+- Each dashboard visit shows different random image from cache
+- Bookmark toggle uses optimistic updates (update cache immediately)
+- No additional API calls unless user explicitly refreshes
+
+---
+
+## V3.1 Implementation Notes
+
+### Dashboard Search Filter
+
+A client-side search filter for the dashboard.
+
+### Key Component
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `DashboardSearchBar` | `components/dashboard/DashboardSearchBar.tsx` | Search input with clear button |
+
+### Helper Function
+
+Implemented in `client/src/lib/utils.ts`:
+
+```typescript
+// Filter curriculums by search query (AND logic across title, author, platform)
+function filterCurriculums(
+  curriculums: CurriculumWithProgress[],
+  query: string
+): CurriculumWithProgress[]
+```
+
+### Search Behavior
+
+- Searches across: `title`, `author`, `platform`
+- **AND logic**: All words must appear in combined searchable text
+- Case-insensitive matching
+- Real-time filtering (no debounce needed for typical dataset sizes)
+- Empty query shows all curriculums
+
+### Integration in Dashboard
+
+```typescript
+// Dashboard.tsx
+const [searchQuery, setSearchQuery] = useState('');
+const filteredCurriculums = filterCurriculums(curriculums, searchQuery);
+
+// Then use filteredCurriculums for grouping and rendering
+```
+
+---
+
 ## Testing Notes
 
 Currently no automated tests. When adding tests:
@@ -383,7 +536,10 @@ Currently no automated tests. When adding tests:
 - **Local-only**: Do not expose server to network
 - **No authentication**: Single-user design
 - **Input validation**: Always use Zod schemas
-- **No secrets**: No API keys or credentials needed
+- **Secrets Management (V3)**: 
+  - Pixiv refresh token stored in `server/.env`
+  - `.env` is already in `.gitignore` - NEVER commit
+  - Create `.env.example` for documentation (without real values)
 
 ---
 
@@ -440,6 +596,15 @@ cd shared && pnpm build
 | GET | `/api/export/tora` | Export Tora-chan format |
 | POST | `/api/import` | Import curriculum JSON |
 
+### Pixiv API Endpoints (V3)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/pixiv/daily-ranking` | Get top 15 daily illustrations |
+| POST | `/api/pixiv/bookmark/:illustId` | Bookmark illustration |
+| DELETE | `/api/pixiv/bookmark/:illustId` | Remove bookmark |
+| GET | `/api/pixiv/image` | Proxy Pixiv image with headers |
+
 ### Color Scheme
 
 | Variable | Usage |
@@ -452,9 +617,44 @@ cd shared && pnpm build
 
 ---
 
+## Documentation Maintenance Protocol
+
+### CRITICAL RULE: Post-Implementation Review
+
+**Every time you finish a coding task, you MUST:**
+
+1. **Review Documentation**: Check `docs/PRD.md`, `docs/TECH.md`, and `AGENTS.md`
+2. **Assess Changes**: Determine if the implementation:
+   - Added new features not documented in PRD
+   - Changed architecture or introduced new patterns
+   - Added new dependencies or integrations
+   - Modified API endpoints or data models
+3. **Update Immediately**: If any documentation is stale or missing:
+   - Update `PRD.md` with new features, user stories, or requirements
+   - Update `TECH.md` with architecture changes, new integrations, or API changes
+   - Update `AGENTS.md` if new coding patterns or conventions were established
+
+### Documentation Files
+
+| File | Purpose | When to Update |
+|------|---------|----------------|
+| `docs/PRD.md` | Product requirements, features, user stories | New features, changed functionality |
+| `docs/TECH.md` | Technical stack, architecture, integrations | New packages, API changes, architecture decisions |
+| `AGENTS.md` | Coding conventions, patterns, project structure | New patterns, component conventions |
+
+### Source of Truth
+
+These three files serve as the **single source of truth** for the project:
+- Before implementing: Read them to understand current state
+- During implementation: Follow established patterns
+- After implementation: Update them to reflect new reality
+
+---
+
 ## Contact & Resources
 
 - **Documentation**: `docs/` directory
 - **README**: Setup and usage instructions
 - **PRD**: `docs/PRD.md` - Product requirements
+- **TECH**: `docs/TECH.md` - Technical stack and architecture
 - **V2 Spec**: `docs/V2-FEATURES.md` - V2 feature details

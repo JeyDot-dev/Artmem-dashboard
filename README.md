@@ -52,20 +52,39 @@ This will start both the frontend (http://localhost:5173) and backend (http://lo
 tora-art-dashboard/
 ├── docs/                    # Documentation
 │   ├── PRD.md              # Product Requirements Document
+│   ├── TECH.md             # Technical Stack & Architecture
 │   └── V2-FEATURES.md      # V2 Feature Specification (Dashboard, Current Task Widget)
 ├── AGENTS.md               # AI coding assistant guidelines
 ├── client/                 # React frontend (Vite + React 19)
 │   ├── src/
 │   │   ├── components/     # UI components
-│   │   ├── lib/           # Utilities & API client
-│   │   ├── styles/        # Global styles
-│   │   └── App.tsx        # Main app component
+│   │   │   ├── dashboard/  # Dashboard components (V2/V3)
+│   │   │   │   ├── Dashboard.tsx
+│   │   │   │   ├── DashboardSearchBar.tsx  # V3.1: Search filter
+│   │   │   │   ├── DashboardHeaderRow.tsx  # V3: Header container
+│   │   │   │   ├── Toolbox.tsx             # V3: Tool launcher widget
+│   │   │   │   ├── PixivWidget.tsx         # V3: Pixiv inspiration card
+│   │   │   │   └── PixivLightbox.tsx       # V3: Full-screen viewer
+│   │   │   ├── curriculum/ # Curriculum detail components
+│   │   │   ├── layout/     # Header, Sidebar
+│   │   │   └── ui/         # shadcn/ui primitives
+│   │   ├── config/         # Configuration files
+│   │   │   └── toolbox.ts  # V3: Hardcoded tool configurations
+│   │   ├── lib/            # Utilities & API client
+│   │   ├── styles/         # Global styles
+│   │   └── App.tsx         # Main app component
 │   └── package.json
 ├── server/                 # Node.js backend (Express + SQLite)
 │   ├── src/
-│   │   ├── db/            # Database schema & connection
-│   │   ├── routes/        # API endpoints
-│   │   └── index.ts       # Server entry point
+│   │   ├── db/             # Database schema & connection
+│   │   ├── lib/            # V3: Library modules
+│   │   │   └── pixiv.ts    # V3: Pixiv API client wrapper
+│   │   ├── routes/         # API endpoints
+│   │   │   └── pixiv.ts    # V3: Pixiv API routes
+│   │   ├── types/          # Type declarations
+│   │   │   └── pixiv-api-client.d.ts  # V3: Pixiv module types
+│   │   └── index.ts        # Server entry point
+│   ├── .env.example        # V3: Environment template
 │   └── package.json
 ├── shared/                 # Shared types between client/server
 │   └── types.ts
@@ -83,15 +102,16 @@ tora-art-dashboard/
 - **JSON Import/Export**: Full database backup and curriculum sharing
 - **Tora-chan Memory Pack**: AI-optimized Markdown export for maintaining AI assistant context
 
-### V2 Features ✨ NEW
+### V2 Features
 
 See [docs/V2-FEATURES.md](docs/V2-FEATURES.md) for full specification.
 
-- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned)
+- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned, Wishlist)
   - Cards sorted by deadline (nearest first)
   - Visual priority badges and progress bars
   - Current task preview on ongoing curriculums
   - Responsive grid layout
+  - **Note**: Wishlist items appear only on the dashboard, not in the sidebar
 
 - **Days Remaining**: Smart countdown display showing days until goal date
   - Color-coded urgency: green (>30 days), yellow (8-30 days), red (≤7 days)
@@ -109,6 +129,37 @@ See [docs/V2-FEATURES.md](docs/V2-FEATURES.md) for full specification.
   - Smooth scroll animation centers the task in view
   - 2-second pulse animation draws attention
   - Seamless navigation from widget to item
+
+### V3 Features ✨ NEW
+
+See [docs/TECH.md](docs/TECH.md) for technical specification.
+
+- **Dashboard Header Row**: A new header section at the top of the dashboard containing:
+  
+  - **Toolbox Widget**: Quick access launcher for frequently used external tools
+    - Hardcoded tool configurations in `client/src/config/toolbox.ts`
+    - Click icons to open tools in new tabs
+    - Includes: Clip Studio, Pinterest, Pixiv, YouTube, ArtStation, Notion
+    - Easily extensible by editing configuration file
+  
+  - **Pixiv Inspiration Widget**: Daily top-ranked illustration display
+    - Fetches Top 15 illustrations from Pixiv daily ranking once per session
+    - Shows different random image each time you visit the dashboard
+    - Click thumbnail to open immersive full-screen lightbox
+    - Bookmark/unbookmark directly from lightbox
+    - View on Pixiv with external link button
+    - Aggressive caching strategy minimizes API requests
+
+### V3.1 Features ✨ LATEST
+
+- **Dashboard Search Filter**: Real-time search to quickly find curriculums
+  - Searches across title, author, and platform fields simultaneously
+  - AND logic: all words must appear in the combined searchable text
+  - Case-insensitive matching for flexible searching
+  - Real-time filtering as you type (no submit button needed)
+  - Clear button (X) to reset search instantly
+  - Shows "No matching curriculums" message when filter returns no results
+  - Search persists while on dashboard view
 
 ### UI Highlights
 
@@ -141,19 +192,42 @@ When you first open the app, you'll see the **Dashboard** with all your curricul
   - Sorted by nearest deadline first
 - **⏸️ Standby**: Paused curriculums  
 - **📋 Planned**: Future curriculums
+- **⭐ Wishlist**: Courses you're interested in but not ready to commit to
+  - Appears only on dashboard, not in sidebar
+  - Perfect for tracking potential future learning paths
 
 **Features:**
 - Click any card to open the full curriculum view
 - External links open in new tabs
 - Cards show priority, days remaining, progress, and goal date
 
+### Searching the Dashboard (V3.1)
+
+Use the **Search Bar** at the top of the dashboard to quickly find curriculums:
+
+1. Type keywords in the search field (searches across title, author, and platform)
+2. Results filter in real-time as you type
+3. Use multiple words to narrow results (AND logic: all words must match)
+4. Click the **X** button or clear the text to show all curriculums again
+
+**Example searches:**
+- `drawabox` - Finds any curriculum with "drawabox" in title, author, or platform
+- `proko anatomy` - Finds curriculums containing both "proko" AND "anatomy"
+- Search is case-insensitive: `UDEMY` matches `udemy`
+
 ### Creating a Curriculum
 
 1. Click the **+** button in the sidebar
 2. Fill in curriculum details (title, author, platform, etc.)
-3. Set priority (High/Medium/Low) and status (Ongoing/Standby/Planned)
+3. Set priority (High/Medium/Low) and status (Ongoing/Standby/Planned/Wishlist)
 4. Optionally set a goal end date to enable days remaining countdown
 5. Click **Create**
+
+**Status Options:**
+- **Ongoing**: Currently studying
+- **Standby**: Temporarily paused
+- **Planned**: Scheduled to start soon
+- **Wishlist**: Interested but not committed (dashboard-only)
 
 ### Adding Sections and Items
 
@@ -202,28 +276,72 @@ SQLite database is stored at `server/data/tora.db`
 
 ### API Endpoints
 
+**Curriculum Management:**
 - `GET /api/curriculums` - List all curriculums
 - `GET /api/curriculums/:id` - Get curriculum detail
 - `POST /api/curriculums` - Create curriculum
 - `PATCH /api/curriculums/:id` - Update curriculum
 - `DELETE /api/curriculums/:id` - Delete curriculum
-- Similar endpoints for sections and items
-- `/api/import` - Import curriculum from JSON
-- `/api/export/json` - Export full database
-- `/api/export/tora` - Generate Tora-chan Memory Pack
+
+**Sections & Items:**
+- Similar CRUD endpoints for sections and items
+
+**Import/Export:**
+- `POST /api/import` - Import curriculum from JSON
+- `GET /api/export/json` - Export full database
+- `GET /api/export/tora` - Generate Tora-chan Memory Pack
+
+**Pixiv Integration (V3):**
+- `GET /api/pixiv/daily-ranking` - Get top 15 daily illustrations
+- `POST /api/pixiv/bookmark/:illustId` - Bookmark illustration
+- `DELETE /api/pixiv/bookmark/:illustId` - Remove bookmark
+- `GET /api/pixiv/image?url=<pixiv_image_url>` - Proxy Pixiv images with proper headers
 
 ### Environment Variables
 
 **Server** (`server/.env`):
 ```env
 PORT=3001
-DATABASE_URL=./data/tora.db
+
+# V3 Feature: Pixiv API Integration (Optional)
+# Required for Pixiv Inspiration Widget to work
+# See "Pixiv Integration Setup" section below for instructions
+PIXIV_REFRESH_TOKEN=your_pixiv_refresh_token_here
 ```
 
 **Client** (`client/.env`):
 ```env
 VITE_API_URL=/api
 ```
+
+### Pixiv Integration Setup (V3 - Optional)
+
+The Pixiv Inspiration Widget requires a Pixiv refresh token. If not configured, the widget will display an error message but the rest of the app will work normally.
+
+**Steps to obtain a Pixiv Refresh Token:**
+
+1. Install a Pixiv authentication tool (recommended: [pixiv-auth](https://github.com/alphasp/pixiv-auth))
+   ```bash
+   npx pixiv-auth login
+   ```
+
+2. Complete the OAuth flow in your browser
+
+3. Copy the `refresh_token` from the output
+
+4. Create `server/.env` file (use `server/.env.example` as template):
+   ```bash
+   cp server/.env.example server/.env
+   ```
+
+5. Add your refresh token to `server/.env`:
+   ```env
+   PIXIV_REFRESH_TOKEN=your_actual_refresh_token_here
+   ```
+
+6. Restart the server for changes to take effect
+
+**Note:** The `.env` file is gitignored and will never be committed. Keep your refresh token private.
 
 ## Security Note
 

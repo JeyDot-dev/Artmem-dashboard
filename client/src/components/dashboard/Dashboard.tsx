@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StatusSection } from './StatusSection';
 import { CurriculumCard, CurriculumCardWithTask } from './CurriculumCard';
-import { getDaysRemaining } from '../../lib/utils';
+import { DashboardHeaderRow } from './DashboardHeaderRow';
+import { DashboardSearchBar } from './DashboardSearchBar';
+import { getDaysRemaining, filterCurriculums } from '../../lib/utils';
 import * as api from '../../lib/api';
 import type { CurriculumWithProgress, CurriculumStatus } from '../../../../shared/types';
 
@@ -11,14 +14,20 @@ interface DashboardProps {
 }
 
 export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
-  // Group curriculums by status
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Apply search filter
+  const filteredCurriculums = filterCurriculums(curriculums, searchQuery);
+  
+  // Group filtered curriculums by status
   const groupedByStatus: Record<CurriculumStatus, CurriculumWithProgress[]> = {
     ongoing: [],
     standby: [],
     planned: [],
+    wishlist: [],
   };
   
-  curriculums.forEach((curriculum) => {
+  filteredCurriculums.forEach((curriculum) => {
     groupedByStatus[curriculum.status].push(curriculum);
   });
   
@@ -48,6 +57,12 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
           Track your learning progress across all curriculums
         </p>
       </div>
+      
+      {/* Search Bar */}
+      <DashboardSearchBar value={searchQuery} onChange={setSearchQuery} />
+      
+      {/* Dashboard Header Row - Toolbox + Pixiv Widget */}
+      <DashboardHeaderRow />
       
       {/* Ongoing Section - with current task */}
       {groupedByStatus.ongoing.length > 0 && (
@@ -100,11 +115,36 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
         </StatusSection>
       )}
       
-      {/* Empty state */}
+      {/* Wishlist Section */}
+      {groupedByStatus.wishlist.length > 0 && (
+        <StatusSection
+          status="wishlist"
+          count={groupedByStatus.wishlist.length}
+          defaultExpanded={false}
+        >
+          {groupedByStatus.wishlist.map((curriculum) => (
+            <CurriculumCard
+              key={curriculum.id}
+              curriculum={curriculum}
+              onClick={onSelectCurriculum}
+            />
+          ))}
+        </StatusSection>
+      )}
+      
+      {/* Empty state - no curriculums at all */}
       {curriculums.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <p className="text-lg mb-2">No curriculums yet</p>
           <p className="text-sm">Create your first curriculum to get started!</p>
+        </div>
+      )}
+      
+      {/* No search results */}
+      {filteredCurriculums.length === 0 && curriculums.length > 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="text-lg mb-2">No matching curriculums</p>
+          <p className="text-sm">Try adjusting your search terms</p>
         </div>
       )}
     </div>

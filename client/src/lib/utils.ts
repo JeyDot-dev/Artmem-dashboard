@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { CurriculumDetail, Item, CurrentTaskInfo } from '../../../shared/types';
+import type { CurriculumDetail, Item, CurrentTaskInfo, CurriculumWithProgress } from '../../../shared/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -100,4 +100,41 @@ export function scrollToItem(itemId: number): void {
       element.classList.remove('item-highlight');
     }, 2000);
   }
+}
+
+/**
+ * Filters curriculums based on a search query.
+ * Search is performed across title, author, and platform fields.
+ * Uses AND logic: all words must appear in the combined searchable text.
+ * 
+ * @param curriculums - Array of curriculums to filter
+ * @param query - Search query string
+ * @returns Filtered array of curriculums
+ */
+export function filterCurriculums(
+  curriculums: CurriculumWithProgress[],
+  query: string
+): CurriculumWithProgress[] {
+  // Empty or whitespace-only query returns all curriculums
+  const trimmedQuery = query.trim().toLowerCase();
+  if (!trimmedQuery) {
+    return curriculums;
+  }
+
+  // Split query into individual words
+  const searchWords = trimmedQuery.split(/\s+/);
+
+  return curriculums.filter((curriculum) => {
+    // Build searchable text from title, author, and platform
+    const searchableText = [
+      curriculum.title,
+      curriculum.author || '',
+      curriculum.platform || '',
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    // All words must appear in the searchable text (AND logic)
+    return searchWords.every((word) => searchableText.includes(word));
+  });
 }

@@ -5,6 +5,8 @@ import type {
   Section,
   Item,
   CurriculumJSON,
+  PixivIllustration,
+  PixivRankingResponse,
 } from '../../../shared/types';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
@@ -114,4 +116,18 @@ export const exportToraMemoryPack = async () => {
   a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'tora-memory-pack.zip';
   a.click();
   window.URL.revokeObjectURL(url);
+};
+
+// Pixiv API
+export const getPixivDailyRanking = (): Promise<PixivRankingResponse> => 
+  fetchApi<PixivRankingResponse>('/pixiv/daily-ranking');
+
+export const bookmarkPixivIllust = (illustId: number) =>
+  fetchApi<{ success: boolean }>(`/pixiv/bookmark/${illustId}`, { method: 'POST' });
+
+export const unbookmarkPixivIllust = (illustId: number) =>
+  fetchApi<{ success: boolean }>(`/pixiv/bookmark/${illustId}`, { method: 'DELETE' });
+
+export const getPixivImageUrl = (pixivUrl: string): string => {
+  return `${API_URL}/pixiv/image?url=${encodeURIComponent(pixivUrl)}`;
 };

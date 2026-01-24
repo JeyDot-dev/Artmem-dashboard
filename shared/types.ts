@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Enums
-export const curriculumStatusSchema = z.enum(['ongoing', 'standby', 'planned']);
+export const curriculumStatusSchema = z.enum(['ongoing', 'standby', 'planned', 'wishlist']);
 export const curriculumPrioritySchema = z.enum(['high', 'medium', 'low']);
 export const itemTypeSchema = z.enum(['video', 'reading', 'exercise', 'homework', 'other']);
 export const itemStatusSchema = z.enum(['not_started', 'in_progress', 'completed']);
@@ -168,4 +168,43 @@ export interface CurriculumCardData extends CurriculumWithProgress {
 export interface CurrentTaskInfo extends TaskPreview {
   description: string | null;
   sectionId: number;
+}
+
+// V3 Types for Pixiv Integration
+export interface PixivIllustration {
+  id: number;
+  title: string;
+  type: string;
+  imageUrls: {
+    squareMedium: string;
+    medium: string;
+    large: string;
+    original: string;
+  };
+  caption: string;
+  user: {
+    id: number;
+    name: string;
+    account: string;
+    profileImageUrls: {
+      medium: string;
+    };
+  };
+  tags: Array<{ name: string }>;
+  width: number;
+  height: number;
+  isBookmarked: boolean;
+}
+
+export interface PixivRankingResponse {
+  illustrations: PixivIllustration[];
+}
+
+// V3 Types for Toolbox
+export interface Tool {
+  id: string;
+  name: string;
+  url: string;
+  icon: string; // Icon name from lucide-react
+  description?: string;
 }

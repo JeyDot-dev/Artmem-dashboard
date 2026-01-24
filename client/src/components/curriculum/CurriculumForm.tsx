@@ -179,6 +179,7 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
                   <option value="ongoing">Ongoing</option>
                   <option value="standby">Standby</option>
                   <option value="planned">Planned</option>
+                  <option value="wishlist">Wishlist</option>
                 </Select>
               </div>
             </div>
