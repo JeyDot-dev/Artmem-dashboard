@@ -1,4 +1,4 @@
-import { Users, Bone, Timer, Zap } from 'lucide-react';
+import { Users, Bone, Timer, Zap, PencilLine } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface Tool {
@@ -37,5 +37,12 @@ export const tools: Tool[] = [
     url: 'https://www.proko.com/values',
     icon: Zap,
     description: 'Study light & shadow',
+  },
+  {
+    id: 'draw-a-card',
+    name: 'Draw a Card',
+    url: 'https://mark-gerarts.github.io/draw-a-card/index.html',
+    icon: PencilLine,
+    description: 'Drawabox warmup picker',
   },
 ];
