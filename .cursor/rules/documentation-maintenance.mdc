@@ -1,0 +1,48 @@
+---
+description: Documentation must be updated alongside code changes
+alwaysApply: true
+---
+
+# Documentation Maintenance Rule
+
+When making changes to the codebase, **always update the relevant documentation files** unless the change is trivial and not useful for understanding future changes or features.
+
+## Documentation Files to Maintain
+
+- `README.md` - Main project documentation, usage guide, and feature descriptions
+- Any files in `docs/` directory - Technical specifications and design documents
+- Code comments for complex logic
+
+## When to Update Documentation
+
+### ✅ Always Update For
+
+- **Feature additions**: New functionality, API endpoints, UI components
+- **Feature modifications**: Changes to how existing features work
+- **Configuration changes**: New environment variables, config files, or settings
+- **API changes**: Modified endpoints, request/response formats, or parameters
+- **Installation steps**: Changes to setup, prerequisites, or dependencies
+- **Usage patterns**: New ways to use the application or workflows
+- **File structure changes**: Moving, renaming, or reorganizing directories
+
+### ❌ Skip Documentation For
+
+- **Minor bug fixes**: Internal fixes that don't change behavior or usage
+- **Refactoring**: Code improvements that don't affect external functionality
+- **Formatting/linting**: Code style changes
+- **Dependency bumps**: Minor version updates without API changes
+
+## Best Practices
+
+1. **Update documentation in the same commit** as the code change
+2. **Be specific**: Describe what changed and why it matters to users
+3. **Keep examples current**: Update code examples if they're affected
+4. **Check cross-references**: Update all docs that mention the changed feature
+5. **Test accuracy**: Verify that documentation matches the actual implementation
+
+## Example
+
+When updating an export feature to change a filename:
+- ✅ Update README to reflect the new filename
+- ✅ Update any usage guides that show the export process
+- ✅ Update example outputs or screenshots if applicable

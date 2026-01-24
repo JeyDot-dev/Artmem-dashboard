@@ -98,7 +98,7 @@ tora-art-dashboard/
 | UI | shadcn/ui + Tailwind CSS | Beautiful, accessible components |
 | State | TanStack Query v5 | Server state management |
 | Backend | Node.js + Express | REST API server |
-| Database | SQLite (better-sqlite3) | Local, zero-config storage |
+| Database | sql.js | In-memory SQLite database |
 | ORM | Drizzle ORM | Type-safe database queries |
 | Validation | Zod | Runtime type checking |
 
@@ -128,7 +128,7 @@ tora-art-dashboard/
 
 1. Click **Export to Tora-chan** in the header
 2. Download the ZIP file containing:
-   - `tora-progress-YYYY-MM-DD.md` - Token-optimized Markdown summary
+   - `ToraCoursesDashboard.md` - Token-optimized Markdown summary
    - `tora-full-backup-YYYY-MM-DD.json` - Full JSON backup
 
 The Markdown file is optimized for AI consumption:

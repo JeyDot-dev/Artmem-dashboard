@@ -281,7 +281,7 @@ router.get('/export/tora', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="tora-memory-pack-${timestamp}.zip"`);
 
     archive.pipe(res);
-    archive.append(markdown, { name: `tora-progress-${timestamp}.md` });
+    archive.append(markdown, { name: 'ToraCoursesDashboard.md' });
     archive.append(JSON.stringify(exportData, null, 2), { name: `tora-full-backup-${timestamp}.json` });
     await archive.finalize();
   } catch (error) {

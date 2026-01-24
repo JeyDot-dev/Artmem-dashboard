@@ -2,7 +2,7 @@ import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
 import { drizzle } from 'drizzle-orm/sql-js';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import * as schema from './schema.js';
 
 const databasePath = resolve(process.env.DATABASE_URL || './data/tora.db');
@@ -118,7 +118,7 @@ export function scheduleSave(): void {
 // Save on process exit
 process.on('exit', () => {
   const data = sqlite.export();
-  require('fs').writeFileSync(databasePath, data);
+  writeFileSync(databasePath, data);
   console.log('💾 Database saved on exit');
 });
 
