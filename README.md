@@ -50,10 +50,10 @@ This will start both the frontend (http://localhost:5173) and backend (http://lo
 
 ```
 tora-art-dashboard/
-├── docs/                    # Memory Bank documentation
-│   ├── PRD.md              # Product Requirements
-│   └── TECH.md             # Technical Specification
-├── AGENTS.md               # AI coding rules
+├── docs/                    # Documentation
+│   ├── PRD.md              # Product Requirements Document
+│   └── V2-FEATURES.md      # V2 Feature Specification (Dashboard, Current Task Widget)
+├── AGENTS.md               # AI coding assistant guidelines
 ├── client/                 # React frontend (Vite + React 19)
 │   ├── src/
 │   │   ├── components/     # UI components
@@ -79,8 +79,36 @@ tora-art-dashboard/
 - **Curriculum Management**: Create, read, update, and delete curriculums via web UI
 - **Progress Tracking**: Visual progress bars and item status (not started → in progress → completed)
 - **Section & Item Organization**: Hierarchical structure with drag-and-drop reordering
+- **Navigation**: Click site name in header to return to dashboard from any curriculum
 - **JSON Import/Export**: Full database backup and curriculum sharing
 - **Tora-chan Memory Pack**: AI-optimized Markdown export for maintaining AI assistant context
+
+### V2 Features ✨ NEW
+
+See [docs/V2-FEATURES.md](docs/V2-FEATURES.md) for full specification.
+
+- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned)
+  - Cards sorted by deadline (nearest first)
+  - Visual priority badges and progress bars
+  - Current task preview on ongoing curriculums
+  - Responsive grid layout
+
+- **Days Remaining**: Smart countdown display showing days until goal date
+  - Color-coded urgency: green (>30 days), yellow (8-30 days), red (≤7 days)
+  - Shows "Today!" for due dates and "X days overdue" for missed deadlines
+  - Displayed on both dashboard cards and curriculum detail view
+
+- **Current Task Widget**: Compact, minimal widget showing your current or next task
+  - Shows first "in progress" item, or next "not started" item
+  - Displays task details with section context
+  - Entire widget is clickable for quick navigation
+  - Uses lucide-react icons (no emojis)
+  - Completion indicator when all tasks complete
+
+- **Smooth Scroll + Highlight**: Click widget to smoothly scroll and highlight the item
+  - Smooth scroll animation centers the task in view
+  - 2-second pulse animation draws attention
+  - Seamless navigation from widget to item
 
 ### UI Highlights
 
@@ -104,25 +132,51 @@ tora-art-dashboard/
 
 ## Usage Guide
 
+### Dashboard Navigation (V2)
+
+When you first open the app, you'll see the **Dashboard** with all your curriculums organized by status:
+
+- **📊 Ongoing**: Currently active curriculums (expanded by default)
+  - Shows current/next task preview
+  - Sorted by nearest deadline first
+- **⏸️ Standby**: Paused curriculums  
+- **📋 Planned**: Future curriculums
+
+**Features:**
+- Click any card to open the full curriculum view
+- External links open in new tabs
+- Cards show priority, days remaining, progress, and goal date
+
 ### Creating a Curriculum
 
 1. Click the **+** button in the sidebar
 2. Fill in curriculum details (title, author, platform, etc.)
 3. Set priority (High/Medium/Low) and status (Ongoing/Standby/Planned)
-4. Click **Create**
+4. Optionally set a goal end date to enable days remaining countdown
+5. Click **Create**
 
 ### Adding Sections and Items
 
-1. Select a curriculum from the sidebar
+1. Select a curriculum from the sidebar (or click a card from the dashboard)
 2. Click **Add Section** to create a new section
 3. Within each section, click **+ Item** to add study items
 4. Set item type (Video/Reading/Exercise/Homework/Other)
+
+### Using the Current Task Widget (V2)
+
+When viewing a curriculum, you'll see the **Current Task Widget** prominently displayed:
+
+- Shows your active "in progress" task, or the next "not started" task
+- Displays task details and which section it belongs to
+- Click **Go to Task** to smoothly scroll to the item with a highlight animation
+- Celebrates with a 🎉 when all tasks are complete
 
 ### Tracking Progress
 
 - Click on any item's status icon to cycle through:
   - ☐ Not Started → ▶ In Progress → ✓ Completed
 - Progress bars automatically update at section and curriculum levels
+- Current task widget updates in real-time
 
 ### Exporting for Tora-chan
 

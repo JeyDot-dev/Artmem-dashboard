@@ -5,15 +5,19 @@ interface HeaderProps {
   onExportJSON: () => void;
   onExportTora: () => void;
   onImport: () => void;
+  onHome: () => void;
 }
 
-export function Header({ onExportJSON, onExportTora, onImport }: HeaderProps) {
+export function Header({ onExportJSON, onExportTora, onImport, onHome }: HeaderProps) {
   return (
     <header className="border-b border-border bg-card px-6 py-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <button
+          onClick={onHome}
+          className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+        >
           Tora-chan Art Study Dashboard
-        </h1>
+        </button>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={onImport}>
             <Download className="h-4 w-4 mr-2" />

@@ -1,11 +1,12 @@
-import { useState } from 'react';
 import { Edit, Trash2, Plus, Video, BookOpen, Dumbbell, FileText, Circle } from 'lucide-react';
 import { format } from 'date-fns';
 import { CurriculumDetail, ItemType } from '../../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+import { cn, scrollToItem } from '@/lib/utils';
+import { DaysRemaining } from '../dashboard/DaysRemaining';
+import { CurrentTaskWidget } from './CurrentTaskWidget';
 
 interface CurriculumDetailViewProps {
   curriculum: CurriculumDetail;
@@ -66,7 +67,20 @@ export function CurriculumDetailView({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <CardTitle className="text-3xl">{curriculum.title}</CardTitle>
+                <CardTitle className="text-3xl">
+                  {curriculum.platformUrl ? (
+                    <a
+                      href={curriculum.platformUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {curriculum.title}
+                    </a>
+                  ) : (
+                    curriculum.title
+                  )}
+                </CardTitle>
                 <span className={cn('text-sm font-medium', priorityColors[curriculum.priority])}>
                   {curriculum.priority.toUpperCase()}
                 </span>
@@ -100,8 +114,11 @@ export function CurriculumDetailView({
                 <CardDescription className="mt-2">{curriculum.description}</CardDescription>
               )}
               {curriculum.endDate && (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  <span>Goal: {format(typeof curriculum.endDate === 'string' ? new Date(curriculum.endDate) : curriculum.endDate, 'MMM d, yyyy')}</span>
+                <div className="mt-2 flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    Goal: {format(typeof curriculum.endDate === 'string' ? new Date(curriculum.endDate) : curriculum.endDate, 'MMM d, yyyy')}
+                  </span>
+                  <DaysRemaining endDate={curriculum.endDate} />
                 </div>
               )}
             </div>
@@ -126,6 +143,12 @@ export function CurriculumDetailView({
           </div>
         </CardHeader>
       </Card>
+
+      {/* Current Task Widget */}
+      <CurrentTaskWidget 
+        curriculum={curriculum} 
+        onTaskClick={(itemId) => scrollToItem(itemId)} 
+      />
 
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Sections</h2>
@@ -185,6 +208,7 @@ export function CurriculumDetailView({
                     {section.items.map((item) => (
                       <div
                         key={item.id}
+                        data-item-id={item.id}
                         className={cn(
                           'flex items-center gap-3 p-3 rounded-lg border transition-colors group',
                           item.status === 'completed' && 'bg-secondary/50 border-accent/20',

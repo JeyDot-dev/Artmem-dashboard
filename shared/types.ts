@@ -150,3 +150,22 @@ export const curriculumJSONSchema: z.ZodType<CurriculumJSON> = z.object({
     })),
   })),
 });
+
+// V2 Types for Dashboard
+export interface TaskPreview {
+  id: number;
+  title: string;
+  type: ItemType;
+  status: ItemStatus;
+  sectionTitle: string;
+}
+
+export interface CurriculumCardData extends CurriculumWithProgress {
+  daysRemaining: number | null;
+  currentTask: TaskPreview | null;
+}
+
+export interface CurrentTaskInfo extends TaskPreview {
+  description: string | null;
+  sectionId: number;
+}

@@ -22,3 +22,23 @@
     text-wrap: balance;
   }
 }
+
+/* Item highlight animation */
+@keyframes highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7);
+    background-color: hsl(var(--primary) / 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+    background-color: hsl(var(--primary) / 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+    background-color: transparent;
+  }
+}
+
+.item-highlight {
+  animation: highlight-pulse 2s ease-out;
+}

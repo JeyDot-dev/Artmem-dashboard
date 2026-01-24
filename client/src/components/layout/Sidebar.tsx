@@ -73,9 +73,16 @@ export function Sidebar({ curriculums, selectedId, onSelect, onAddNew, collapsed
                     ) : (
                       <>
                         <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                        <span className="flex-1 text-left truncate">{curriculum.title}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-left truncate">{curriculum.title}</div>
+                          {curriculum.platform && (
+                            <div className="text-xs opacity-70 truncate mt-0.5">
+                              {curriculum.platform}
+                            </div>
+                          )}
+                        </div>
                         <span className={cn(
-                          "text-xs font-medium",
+                          "text-xs font-medium flex-shrink-0",
                           selectedId === curriculum.id
                             ? "text-primary-foreground"
                             : "text-foreground opacity-70"

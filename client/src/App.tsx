@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
+import { Dashboard } from './components/dashboard/Dashboard';
 import { CurriculumDetailView } from './components/curriculum/CurriculumDetail';
 import { CurriculumForm } from './components/curriculum/CurriculumForm';
 import { SectionForm } from './components/curriculum/SectionForm';
 import { ItemForm } from './components/curriculum/ItemForm';
 import { ImportDropzone } from './components/common/ImportDropzone';
 import * as api from './lib/api';
-import { Card, CardContent } from './components/ui/card';
 import type { Curriculum, Section, Item } from '../../shared/types';
 
 export default function App() {
@@ -163,6 +163,7 @@ export default function App() {
         onExportJSON={handleExportJSON}
         onExportTora={handleExportTora}
         onImport={() => setShowImport(!showImport)}
+        onHome={() => setSelectedCurriculumId(null)}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -231,14 +232,10 @@ export default function App() {
               onCycleItemStatus={(itemId) => cycleItemStatusMutation.mutate(itemId)}
             />
           ) : (
-            <Card>
-              <CardContent className="py-24 text-center">
-                <h2 className="text-2xl font-semibold mb-2">Welcome to Tora-chan Art Study Dashboard</h2>
-                <p className="text-muted-foreground mb-6">
-                  Select a curriculum from the sidebar or create a new one to get started.
-                </p>
-              </CardContent>
-            </Card>
+            <Dashboard
+              curriculums={curriculums}
+              onSelectCurriculum={setSelectedCurriculumId}
+            />
           )}
         </main>
       </div>
