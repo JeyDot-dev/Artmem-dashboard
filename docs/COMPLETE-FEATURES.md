@@ -1,7 +1,7 @@
 # Artmem Dashboard - Complete Feature Documentation
 
-**Version:** 2.0  
-**Last Updated:** January 24, 2026  
+**Version:** 3.1  
+**Last Updated:** January 25, 2026  
 **Purpose:** External AI feature brainstorming reference
 
 ---
@@ -25,6 +25,8 @@
 15. [Task Focus Features](#15-task-focus-features)
 16. [Data Persistence & Storage](#16-data-persistence--storage)
 17. [Technical Characteristics](#17-technical-characteristics)
+18. [V3 Features - Dashboard Header Row](#18-v3-features---dashboard-header-row)
+19. [External Integrations](#19-external-integrations)
 
 ---
 
@@ -192,17 +194,19 @@ An individual learning task or activity.
 
 ### 3.5 Curriculum Status Types
 
-**Feature:** Three status categories for organizing workflow.
+**Feature:** Four status categories for organizing workflow.
 
 **Statuses:**
 - **Ongoing**: Currently active, being worked on
 - **Standby**: Paused, on hold temporarily
 - **Planned**: Future, not yet started
+- **Wishlist**: Ideas or courses to consider in the future
 
 **Behavior:**
-- Determines sidebar grouping
-- Affects dashboard card grouping
+- Determines sidebar grouping (**Note**: Wishlist items are excluded from sidebar)
+- Affects dashboard card grouping (all 4 statuses appear on dashboard)
 - Ongoing curricula show current task widget on dashboard
+- Wishlist curricula appear only on dashboard, not in sidebar navigation
 - Status can be changed at any time
 
 ### 3.6 Platform Linking
@@ -410,12 +414,17 @@ Curriculum Progress = (Total Completed Items / Total Items Across All Sections) 
 1. **Ongoing** (shown first, expanded by default)
 2. **Standby**
 3. **Planned**
+4. **Wishlist**
 
 **Each Group Shows:**
-- Icon representing status (trending up, pause, clipboard)
+- Icon representing status (trending up, pause, clipboard, star)
 - Count of curricula in group (e.g., "Ongoing (3)")
 - Collapsible/expandable section
 - Curricula sorted by end date within group (nearest deadline first)
+
+**Important Note:**
+- Wishlist curricula appear ONLY on the dashboard, not in the sidebar
+- This keeps the sidebar focused on active/planned work while dashboard shows all possibilities
 
 ### 6.3 Curriculum Cards
 
@@ -539,44 +548,167 @@ Curriculum Progress = (Total Completed Items / Total Items Across All Sections) 
 ```markdown
 # Tora-chan Art Study Progress Report
 
-Generated: YYYY-MM-DD
+Generated: YYYY-MM-DD HH:MM:SS
 
-## Active Studies (Ongoing)
+## 📊 Active Studies (Ongoing)
 
-### Curriculum Title
-**Progress:** 45/120 items (38%)
-**Author:** Jane Doe | **Platform:** [Udemy](URL) | **Priority:** high
+### 📘 [Curriculum Title](URL)
+**Progress:** 45/120 items (38%) | **Priority:** ⚡ high  
+**Author:** Jane Doe | **Platform:** Udemy  
+**Timeline:** Started 2026-01-01 | Goal: 2026-03-15 (45 days remaining)  
+**Description:** Optional curriculum description here
 
-#### Section 1 Title
-Section description (if any)
+**Current Focus:** Section 2 - Item 5 Title (in progress)
+
+#### Section 1: Introduction to Basics
+Progress: 10/10 items (100%)  
+Section description if available
+
 - [✓] Item 1 Title (video) — Completed
-- [▶] Item 2 Title (exercise) — In Progress
-- [ ] Item 3 Title (reading) — Not Started
+- [✓] Item 2 Title (exercise) — Completed
+- [✓] Item 3 Title (reading) — Completed
+... (all 10 items)
 
-#### Section 2 Title
-...
+#### Section 2: Advanced Techniques
+Progress: 5/15 items (33%)  
+Section description if available
+
+- [✓] Item 1 Title (video) — Completed
+- [✓] Item 2 Title (homework) — Completed
+- [✓] Item 3 Title (exercise) — Completed
+- [✓] Item 4 Title (reading) — Completed
+- [▶] Item 5 Title (exercise) — **In Progress** 👈 CURRENT FOCUS
+- [ ] Item 6 Title (video) — Not Started
+- [ ] Item 7 Title (homework) — Not Started
+... (remaining items)
 
 ---
 
-## On Hold (Standby)
+## ⏸️ On Hold (Standby)
 
-### Curriculum Title
-Description or "Currently on hold."
-**Sections:** Section 1, Section 2, Section 3
+### 📕 Curriculum Title
+**Progress:** 15/50 items (30%) | **Priority:** medium  
+**Author:** Author Name | **Platform:** YouTube  
+**Description:** Paused temporarily while focusing on active courses.
+
+**Sections:** Section 1 (completed), Section 2 (in progress), Section 3 (not started)
 
 ---
 
-## Planned
+## 📋 Planned (Not Yet Started)
 
-### Curriculum Title
-Description or "Not yet started."
+### 📗 Curriculum Title
+**Priority:** low  
+**Author:** Author Name | **Platform:** Book  
+**Description:** Planned for future study after completing ongoing courses.
+
+**Sections:** Section 1, Section 2, Section 3, Section 4
+
+---
+
+## ⭐ Wishlist (Ideas for Future)
+
+### 📙 Curriculum Title
+**Author:** Author Name | **Platform:** Skillshare  
+**Description:** Interesting course to consider when time allows.
+
+---
+
+## 📈 Overall Statistics
+
+- **Total Curricula:** 6 (3 ongoing, 1 standby, 1 planned, 1 wishlist)
+- **Total Items Tracked:** 215
+- **Completed Items:** 78 (36%)
+- **In Progress:** 5 (2%)
+- **Not Started:** 132 (61%)
+- **Average Progress per Curriculum:** 42%
 ```
 
+**Markdown Format Details:**
+
+1. **Status Icons:** Each status section has a distinct emoji for visual scanning
+2. **Priority Indicators:** High priority shown with ⚡, clickable links included
+3. **Progress Metrics:** Both fractional and percentage shown
+4. **Timeline Info:** Start/end dates, days remaining with urgency context
+5. **Current Focus Highlighting:** Active task marked with arrow for quick identification
+6. **Completion Indicators:** 
+   - `[✓]` = Completed
+   - `[▶]` = In Progress
+   - `[ ]` = Not Started
+7. **Item Type Tags:** (video), (reading), (exercise), (homework), (other)
+8. **Hierarchical Structure:** Clear section/item hierarchy for AI parsing
+9. **Compact Standby/Planned:** Less detail for non-active curricula (token efficiency)
+10. **Statistics Summary:** Overview of entire learning journey
+
+**JSON Backup Structure:**
+```json
+{
+  "exportDate": "2026-01-25T12:34:56.789Z",
+  "version": "3.1",
+  "curriculums": [
+    {
+      "id": 1,
+      "title": "Curriculum Title",
+      "author": "Author Name",
+      "platform": "Udemy",
+      "platformUrl": "https://...",
+      "description": "Description text",
+      "priority": "high",
+      "status": "ongoing",
+      "startDate": "2026-01-01",
+      "endDate": "2026-03-15",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-25T10:00:00.000Z",
+      "sections": [
+        {
+          "id": 1,
+          "title": "Section Title",
+          "description": "Section description",
+          "sortOrder": 0,
+          "items": [
+            {
+              "id": 1,
+              "title": "Item Title",
+              "description": "Item description",
+              "type": "video",
+              "status": "completed",
+              "sortOrder": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Why Two Formats?**
+
+1. **Markdown for AI Context:**
+   - Quick scanning for conversational context
+   - Human-readable progress updates
+   - Token-efficient for large curricula
+   - Easy to include in chat with AI assistants
+
+2. **JSON for Detailed Analysis:**
+   - Machine-readable structured data
+   - Complete backup for re-import
+   - Enables AI to perform detailed analytics
+   - Contains all metadata and timestamps
+
+**Token Efficiency Strategy:**
+- Ongoing curricula get full detail (most relevant for AI guidance)
+- Standby/Planned curricula get condensed summaries
+- Section progress shown as percentages
+- Only current focus highlighted (reduces noise)
+- Completed sections can be collapsed (optional)
+
 **Use Cases:**
-- Sharing progress with AI study companions (like "Tora-chan")
-- AI can read markdown for quick context
-- AI can parse JSON for detailed analysis
-- Token-efficient format for large curricula
+- **Study Companion AI**: "Here's my progress, what should I focus on?"
+- **Progress Reviews**: "Analyze my completion patterns"
+- **Planning Sessions**: "Help me schedule the next 3 weeks"
+- **Motivation**: "Remind me of what I've accomplished"
+- **Course Recommendations**: "Based on my progress, what should I study next?"
 
 ### 7.3 Import from JSON (File Upload)
 
@@ -884,7 +1016,75 @@ Not Started → In Progress → Completed → Not Started → ...
 
 ## 12. Search & Discovery Features
 
-### 12.1 Current Task Widget
+### 12.1 Dashboard Search Filter
+
+**Feature:** Real-time client-side search to filter dashboard curricula.
+
+**Location:**
+- Dashboard view only
+- Positioned below dashboard header, above status sections
+- Compact input with search icon and clear button
+
+**Search Behavior:**
+- **Multi-field Search**: Searches across `title`, `author`, and `platform` simultaneously
+- **AND Logic**: All typed words must appear somewhere in the combined searchable text
+- **Case-Insensitive**: Matching ignores case differences
+- **Real-Time**: Filters as you type (no submit button needed)
+- **No Debounce**: Fast enough for typical curriculum counts without delay
+
+**Search Algorithm:**
+```
+1. User types query: "drawabox beginner"
+2. Split into words: ["drawabox", "beginner"]
+3. For each curriculum:
+   - Combine fields: "${title} ${author} ${platform}"
+   - Lowercase the combined text
+4. Keep curriculum if ALL words appear in searchable text
+5. Display filtered results in their respective status sections
+```
+
+**Examples:**
+
+| Search Query | Curriculum | Match? | Reason |
+|--------------|------------|--------|--------|
+| `drawabox` | Title: "Drawabox Lessons", Author: "Irshad", Platform: "Drawabox" | ✓ Yes | "drawabox" found in title and platform |
+| `drawabox irshad` | Title: "Drawabox Lessons", Author: "Irshad", Platform: "Drawabox" | ✓ Yes | Both words found in searchable text |
+| `drawabox youtube` | Title: "Drawabox Lessons", Author: "Irshad", Platform: "Drawabox" | ✗ No | "youtube" not found anywhere |
+| `figure drawing` | Title: "Figure Drawing Fundamentals", Author: "Proko", Platform: "YouTube" | ✓ Yes | Both words in title |
+| `proko` | Title: "Figure Drawing Fundamentals", Author: "Proko", Platform: "YouTube" | ✓ Yes | "proko" found in author field |
+
+**UI Components:**
+- Search icon (lucide-react `Search`) on left
+- Input field with placeholder: "Filter by title, author, platform..."
+- Clear button (X icon) on right (appears when text present)
+- Minimal border, compact padding
+- Subtle focus states
+
+**Edge Cases Handled:**
+- Empty/whitespace-only query → Show all curricula
+- No matches → Display "No matching curriculums" message
+- Null `author` or `platform` → Treated as empty string (no crash)
+- Special characters → Handled gracefully (no escaping needed)
+
+**State Management:**
+- Local component state (React `useState`)
+- No API calls (pure client-side filtering)
+- Filter persists until cleared
+- Reset when navigating away from dashboard (intentional design)
+
+**Performance Considerations:**
+- Fast for typical curriculum counts (< 100)
+- No debounce needed for current use case
+- Could add `useMemo` for large datasets if needed
+- Filtering happens synchronously on every keystroke
+
+**Use Cases:**
+- "What course was by that instructor again?"
+- "Which YouTube courses am I tracking?"
+- "Find all Udemy courses"
+- "Where did I save that anatomy course?"
+
+### 12.2 Current Task Widget
 
 **Feature:** Prominently display what to work on next.
 
@@ -1234,20 +1434,242 @@ RETURN null  // All items completed
 
 ---
 
+## 18. V3 Features - Dashboard Header Row
+
+### 18.1 Dashboard Header Row Overview
+
+**Feature:** A dedicated header row positioned at the top of the dashboard, above curriculum status sections.
+
+**Purpose:**
+- Quick access to frequently used external tools
+- Visual inspiration from Pixiv daily rankings
+- Enhanced dashboard experience without cluttering main content
+
+**Layout:**
+```
+┌────────────────────────────────────────────────────────────────┐
+│                          DASHBOARD                              │
+├────────────────────────────────────────────────────────────────┤
+│  ┌──────────────────┐          ┌──────────────────────────┐   │
+│  │    TOOLBOX       │          │   PIXIV INSPIRATION      │   │
+│  │  [Tool] [Tool]   │          │   ┌────────────────┐     │   │
+│  │  [Tool] [Tool]   │          │   │  Random Daily  │     │   │
+│  └──────────────────┘          │   │  Illustration  │     │   │
+│                                │   └────────────────┘     │   │
+│                                └──────────────────────────┘   │
+├────────────────────────────────────────────────────────────────┤
+│  📊 Ongoing (3)                                                │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐                          │
+│  │ Card 1  │ │ Card 2  │ │ Card 3  │                          │
+│  └─────────┘ └─────────┘ └─────────┘                          │
+└────────────────────────────────────────────────────────────────┘
+```
+
+**Components:**
+- Toolbox Widget (left side)
+- Pixiv Inspiration Widget (right side)
+
+### 18.2 Toolbox Widget
+
+**Feature:** A compact widget providing quick access to external tools.
+
+**Characteristics:**
+- "Machine/drawer" aesthetic matching app's minimal doujin style
+- Displays tool icons in a grid layout
+- Each tool is a clickable button opening external URL in new tab
+- Icons from lucide-react (never emojis)
+- Compact padding and spacing
+
+**Configuration:**
+- Tools defined in `client/src/config/toolbox.ts`
+- Hardcoded array of tool objects
+- Easy to extend by editing configuration file
+
+**Tool Configuration Structure:**
+```typescript
+interface Tool {
+  id: string;          // Unique identifier
+  name: string;        // Display name
+  url: string;         // External URL to open
+  icon: LucideIcon;    // Lucide-react icon component
+  description?: string; // Optional tooltip/description
+}
+```
+
+**Example Tools:**
+- Clip Studio (digital painting software)
+- Pinterest (visual inspiration)
+- Reference image sites
+- Tutorial platforms
+- Any frequently used external resource
+
+**Interaction:**
+- Click tool icon → Open URL in new browser tab
+- Hover → Subtle background color change
+- No navigation away from dashboard
+
+**Use Cases:**
+- Quick access to drawing software
+- Launch reference galleries
+- Open tutorial platforms
+- Access art communities
+
+### 18.3 Pixiv Inspiration Widget
+
+**Feature:** Displays random top-ranked illustrations from Pixiv's daily ranking.
+
+**Purpose:**
+- Provide visual inspiration while studying
+- Expose user to high-quality artwork daily
+- Stay motivated with beautiful illustrations
+- Discover new artists
+
+**Display Behavior:**
+- Shows thumbnail of a random illustration from Top 15 daily ranking
+- Fetches Top 15 once per day (cached)
+- Each dashboard visit shows a different random image from cache
+- Avoids showing same image twice consecutively
+
+**Widget Components:**
+1. **Thumbnail Card** (dashboard display)
+   - Compact card matching curriculum card size
+   - Shows illustration thumbnail
+   - Artist name displayed below image
+   - Subtle hover effect
+   - Click to open full-screen lightbox
+
+2. **Lightbox Modal** (full-screen view)
+   - Blurred backdrop overlay
+   - High-resolution image display
+   - Image title and artist information
+   - Bookmark button (toggle bookmark state)
+   - Close button and ESC key support
+   - Click outside to close
+
+**Bookmark Feature:**
+- Button shows current bookmark state from Pixiv API
+  - Outline heart = Not bookmarked
+  - Filled heart = Bookmarked
+- Click to toggle bookmark on user's Pixiv account
+- Optimistic UI updates (immediate visual feedback)
+- Syncs with Pixiv API in background
+
+**Caching Strategy (Critical for Performance):**
+- Query key includes current date (YYYY-MM-DD)
+- Fresh data fetched automatically each day when date changes
+- Data cached for 12 hours within same day (avoids unnecessary refetches)
+- Cache persists for 2 days before garbage collection
+- Manual refresh button available to force immediate refetch
+- Each dashboard mount picks different random image from cache (no API call)
+
+**Authentication:**
+- Requires Pixiv refresh token stored in server environment variables
+- Token used for OAuth2 authentication with Pixiv API
+- Handles token refresh automatically
+- Supports bookmarking to user's Pixiv account
+
+**Privacy & Security:**
+- Refresh token stored in `.env` file (gitignored)
+- Never committed to repository
+- Local-only access (no external sharing of credentials)
+
+**Use Cases:**
+- Daily art inspiration before study session
+- Discover new artists and styles
+- Bookmark favorite artwork for later reference
+- Stay motivated with quality visual content
+
+### 18.4 Image Proxy System
+
+**Feature:** Server-side proxy for Pixiv images.
+
+**Why Needed:**
+- Pixiv images require specific HTTP headers (`Referer`)
+- Direct embedding from Pixiv URLs fails in browser
+- Server proxies requests with proper headers
+
+**Implementation:**
+- Endpoint: `GET /api/pixiv/image?url=<encoded_pixiv_url>`
+- Fetches image from Pixiv with proper headers
+- Streams image data to client
+- Transparent to frontend (just use proxy URL)
+
+---
+
+## 19. External Integrations
+
+### 19.1 Pixiv API Integration
+
+**Feature:** Full integration with Pixiv API for artwork discovery and bookmarking.
+
+**Authentication Method:**
+- OAuth2 with refresh token
+- Refresh token stored in server environment variables
+- Automatic token refresh when expired
+- No user login required (uses single configured account)
+
+**API Endpoints (Backend):**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/pixiv/daily-ranking` | Fetch top 15 daily illustrations |
+| POST | `/api/pixiv/bookmark/:illustId` | Bookmark illustration |
+| DELETE | `/api/pixiv/bookmark/:illustId` | Remove bookmark |
+| GET | `/api/pixiv/image?url=<url>` | Proxy Pixiv image with headers |
+
+**Data Retrieved:**
+- Illustration ID, title, type
+- Image URLs (thumbnail, medium, large)
+- Artist name, ID, profile image
+- Tags, dimensions
+- Current bookmark status
+
+**Rate Limiting Considerations:**
+- Daily ranking cached for 12 hours
+- Minimizes API calls with smart caching
+- Query key includes date for automatic daily refresh
+- No unnecessary refetches on dashboard navigation
+
+**Error Handling:**
+- Graceful fallback if API unavailable
+- Widget shows error state or hides entirely
+- Doesn't block dashboard functionality
+- Retry logic for transient failures
+
+### 19.2 Toolbox External Links
+
+**Feature:** Configurable links to external tools and websites.
+
+**Implementation:**
+- Hardcoded configuration file
+- No API calls (just opens URLs)
+- Opens in new browser tab
+- No tracking or analytics
+
+**Supported Link Types:**
+- Any valid URL
+- Common uses: software, galleries, tutorials, references
+- Easy to add/remove tools by editing config file
+
+---
+
 ## Summary Statistics
 
 Based on this documentation, the application currently has:
 
 - **3 main entity types** (Curriculum, Section, Item)
-- **3 curriculum statuses** (Ongoing, Standby, Planned)
+- **4 curriculum statuses** (Ongoing, Standby, Planned, Wishlist)
 - **3 item statuses** (Not Started, In Progress, Completed)
 - **3 priority levels** (High, Medium, Low)
 - **5 item types** (Video, Reading, Exercise, Homework, Other)
 - **2 export formats** (JSON, Tora-chan Memory Pack)
 - **2 import methods** (File upload, Paste text)
-- **13 API endpoint groups** (CRUD for 3 entities + import/export + special status cycling)
+- **17 API endpoint groups** (CRUD for 3 entities + import/export + status cycling + Pixiv integration)
 - **2 main views** (Dashboard overview, Curriculum detail)
 - **4 progress levels** (Item status, Section %, Curriculum %, Overall completion)
+- **2 dashboard widgets** (Toolbox, Pixiv Inspiration)
+- **1 external integration** (Pixiv API)
+- **Client-side search** (Filter by title, author, platform)
 - **Infinite curricula** (no practical limit on data)
 
 ---
@@ -1261,14 +1683,289 @@ Based on this documentation, the application currently has:
 | **Navigation** | 6 | Dashboard, sidebar, detail view, cards, scroll-to-task, import toggle |
 | **Import/Export** | 5 | 2 export formats + 2 import methods + validation |
 | **Date/Time** | 4 | Start date, end date, days remaining, timestamps |
-| **Categorization** | 11 | 3 statuses + 3 priorities + 5 item types |
+| **Categorization** | 12 | 4 statuses + 3 priorities + 5 item types |
 | **Visual Indicators** | 8 | Progress bars, status icons, type badges, priority badges, hover states, highlights, colors, responsive grid |
 | **Interactive Elements** | 6 | Clickable cards/status/widgets, collapsible sections, forms, drag-drop |
 | **Task Focus** | 3 | Current task detection, widget display, scroll-to-task |
 | **Data Management** | 3 | SQLite persistence, local-only, schema versioning |
+| **Dashboard Widgets** | 2 | Toolbox (quick links), Pixiv Inspiration (artwork display) |
+| **External Integrations** | 1 | Pixiv API (daily rankings, bookmarking, image proxy) |
+| **Search & Filtering** | 1 | Client-side search across title, author, platform (AND logic) |
+
+---
+
+## Appendix A: Technical Implementation Summary
+
+For AI assistants brainstorming new features, here's a quick technical overview:
+
+### Technology Stack
+
+**Frontend:**
+- React 19 (functional components only, hooks-based)
+- Vite (build tool for fast development)
+- TypeScript (strict mode, type-safe)
+- TanStack Query v5 (server state management, caching)
+- Tailwind CSS (utility-first styling)
+- shadcn/ui (accessible component primitives)
+- lucide-react (icon library - NO emojis)
+
+**Backend:**
+- Node.js + Express (HTTP server)
+- TypeScript (strict mode)
+- Drizzle ORM (type-safe database queries)
+- sql.js (SQLite in-memory with file persistence)
+- Zod (runtime validation)
+
+**External Integrations:**
+- Pixiv API (via `pixiv-api-client` package)
+- OAuth2 authentication with refresh token
+
+### Architecture Patterns
+
+**State Management:**
+- Server state: TanStack Query with automatic caching
+- Local UI state: React `useState` hooks
+- No global state management library needed
+
+**API Design:**
+- RESTful JSON API
+- Zod validation on all requests
+- Consistent error responses
+- Express router pattern
+
+**Database:**
+- SQLite in-memory (fast queries)
+- Periodic file persistence (`server/data/tora.db`)
+- Drizzle ORM for type-safe queries
+- Three tables: curriculums, sections, items
+
+**Component Structure:**
+- Functional components only
+- Named exports
+- Props interfaces: `{ComponentName}Props`
+- Tailwind for styling (no CSS modules)
+
+### Key Design Principles
+
+1. **Local-First**: All data stored locally, no cloud dependencies
+2. **Privacy-Focused**: Single-user, no authentication, no telemetry
+3. **Type-Safe**: TypeScript throughout, shared types between client/server
+4. **Minimal Dependencies**: Lean stack, avoid package bloat
+5. **AI-Optimized Exports**: Token-efficient markdown format for AI consumption
+6. **Performance**: In-memory database, optimistic UI updates, smart caching
+
+### API Endpoint Summary
+
+**Curriculum CRUD:**
+- `GET /api/curriculums` - List with progress
+- `GET /api/curriculums/:id` - Detail with sections/items
+- `POST /api/curriculums` - Create
+- `PATCH /api/curriculums/:id` - Update
+- `DELETE /api/curriculums/:id` - Delete (cascade)
+
+**Section CRUD:**
+- `POST /api/curriculums/:id/sections` - Create
+- `PATCH /api/sections/:id` - Update
+- `DELETE /api/sections/:id` - Delete (cascade)
+
+**Item CRUD:**
+- `POST /api/sections/:id/items` - Create
+- `PATCH /api/items/:id` - Update
+- `PATCH /api/items/:id/cycle` - Cycle status (special)
+- `DELETE /api/items/:id` - Delete
+
+**Import/Export:**
+- `POST /api/import` - Import JSON
+- `GET /api/export/json` - Download full backup
+- `GET /api/export/tora` - Download AI-optimized ZIP
+
+**Pixiv Integration (V3):**
+- `GET /api/pixiv/daily-ranking` - Top 15 illustrations
+- `POST /api/pixiv/bookmark/:illustId` - Add bookmark
+- `DELETE /api/pixiv/bookmark/:illustId` - Remove bookmark
+- `GET /api/pixiv/image?url=<url>` - Proxy image with headers
+
+### Configuration Files
+
+**Toolbox Configuration:**
+- `client/src/config/toolbox.ts`
+- Hardcoded array of `Tool` objects
+- Easy to extend by editing file
+
+**Environment Variables:**
+- `server/.env` (gitignored)
+- `PIXIV_REFRESH_TOKEN` - Required for Pixiv integration
+- `PORT` - Optional server port (default: 3001)
+
+### UI/UX Design Philosophy
+
+**Minimal "Doujin" Aesthetic:**
+- Clean, functional, understated
+- Compact components ("barely larger than needed")
+- Always use lucide-react icons (NEVER emojis)
+- Subtle hover states and transitions
+- Make entire areas clickable (avoid unnecessary buttons)
+- Dark mode default with purple/teal accents
+
+**Icon Standards:**
+- Dashboard sections: `TrendingUp`, `Pause`, `ClipboardList`, `Star`
+- Task status: `Play`, `Square`, `CheckCircle2`
+- Priority: `Zap` (lightning bolt)
+- Dates: `Target` (crosshair)
+- Standard size: `h-4 w-4`, Compact: `h-3.5 w-3.5`
+
+**Color Semantic Meaning:**
+- Primary: Main actions, links, in-progress items
+- Accent: Success states, completed items
+- Destructive: Delete, urgent, high priority, overdue
+- Muted: Disabled, not-started items
+
+---
+
+## Appendix B: Data Model Reference
+
+### Entity Relationships
+
+```
+Curriculum (1) ─────< (N) Section (1) ─────< (N) Item
+    │
+    ├─ id: number (PK)
+    ├─ title: string
+    ├─ author: string | null
+    ├─ platform: string | null
+    ├─ platformUrl: string | null
+    ├─ description: string | null
+    ├─ priority: 'high' | 'medium' | 'low'
+    ├─ status: 'ongoing' | 'standby' | 'planned' | 'wishlist'
+    ├─ startDate: Date | null
+    ├─ endDate: Date | null
+    ├─ createdAt: Date
+    └─ updatedAt: Date
+
+Section
+    │
+    ├─ id: number (PK)
+    ├─ curriculumId: number (FK)
+    ├─ title: string
+    ├─ description: string | null
+    ├─ sortOrder: number
+    ├─ createdAt: Date
+    └─ updatedAt: Date
+
+Item
+    │
+    ├─ id: number (PK)
+    ├─ sectionId: number (FK)
+    ├─ title: string
+    ├─ description: string | null
+    ├─ type: 'video' | 'reading' | 'exercise' | 'homework' | 'other'
+    ├─ status: 'not_started' | 'in_progress' | 'completed'
+    ├─ sortOrder: number
+    ├─ createdAt: Date
+    └─ updatedAt: Date
+```
+
+### Progress Calculation Flow
+
+```
+Item Status → Section Progress → Curriculum Progress → Dashboard Stats
+
+1. Item: Has status field (not_started | in_progress | completed)
+2. Section: Calculate % = (completed items / total items in section) × 100
+3. Curriculum: Calculate % = (all completed items / all items) × 100
+4. Dashboard: Aggregate across all curricula for overview
+```
+
+### Current Task Detection Algorithm
+
+```
+1. Flatten all items from all sections (preserving order)
+2. Search for first item with status = 'in_progress'
+3. If found, return that item (highest priority)
+4. If not found, search for first item with status = 'not_started'
+5. If found, return that item (next up)
+6. If all completed, return null (show "All tasks complete")
+```
+
+---
+
+## Appendix C: Extension Points & Brainstorming Prompts
+
+Areas where the application could be extended:
+
+### Potential Feature Areas
+
+1. **Analytics & Insights**
+   - Study time tracking
+   - Completion velocity trends
+   - Heatmaps of study activity
+   - Weekly/monthly progress reports
+
+2. **Curriculum Templates**
+   - Shareable curriculum templates
+   - Community template library
+   - Import from course syllabi (PDF parsing?)
+
+3. **Enhanced Task Management**
+   - Subtasks within items
+   - Task notes/reflections
+   - Attach files or images to items
+   - Time estimates per item
+
+4. **More Integrations**
+   - YouTube API (auto-fetch video duration, thumbnails)
+   - Udemy API (sync course progress)
+   - Goodreads API (for book-based curriculums)
+   - Google Calendar export
+
+5. **Collaboration Features**
+   - Share curriculum with study buddy
+   - Export progress for instructor
+   - Study group synchronization
+
+6. **Gamification (Optional)**
+   - Streak tracking
+   - Completion badges
+   - Progress milestones
+   - Daily goals
+
+7. **Advanced Search**
+   - Search within item descriptions
+   - Filter by date ranges
+   - Filter by completion status
+   - Tag-based organization
+
+8. **Multimedia Enhancements**
+   - Embed videos directly
+   - PDF viewer for reading items
+   - Audio notes or recordings
+   - Screenshots/reference images
+
+9. **AI Features**
+   - AI-generated study plans
+   - Personalized recommendations
+   - Study technique suggestions based on progress patterns
+   - Automated curriculum creation from course URL
+
+10. **Mobile Experience**
+    - Progressive Web App (PWA)
+    - Native mobile apps (React Native)
+    - Simplified mobile UI
+    - Quick status updates on the go
+
+### Constraints to Consider
+
+When brainstorming new features, keep in mind:
+
+- **Local-First Philosophy**: Prefer local storage over cloud services
+- **Privacy**: No user tracking, analytics, or telemetry
+- **Simplicity**: Avoid feature bloat, maintain minimal UI
+- **Single-User Focus**: No multi-user complexity unless specifically needed
+- **Performance**: Keep it fast (< 2s initial load, < 100ms interactions)
+- **Offline-First**: Should work without internet connection
 
 ---
 
 **End of Document**
 
-This comprehensive feature list captures every detail of the Artmem Dashboard application as it exists today. Use this as a reference for brainstorming new features, understanding capabilities, and identifying potential enhancement opportunities.
+This comprehensive feature list captures every detail of the Artmem Dashboard application as it exists today (Version 3.1). Use this as a reference for brainstorming new features, understanding capabilities, and identifying potential enhancement opportunities.
