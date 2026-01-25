@@ -296,10 +296,11 @@ An inspiration widget that displays random top-ranked illustrations from Pixiv.
 - Click outside or press ESC to close
 
 **Caching Strategy:**
-- Fetch once on app initialization, store in TanStack Query cache
-- `staleTime: Infinity` to prevent automatic refetches
-- Manual refresh button (optional) to force new fetch
-- Cache persists for entire browser session
+- Query key includes current date (YYYY-MM-DD), automatically fetches fresh data each day
+- `staleTime: 12 hours` - data cached for half a day to avoid unnecessary refetches
+- Fresh daily ranking fetched automatically when date changes
+- Manual refresh button available to force immediate refetch
+- Cache persists for 2 days before garbage collection
 
 ### 5.8 Dashboard Search Filter
 

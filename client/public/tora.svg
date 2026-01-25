@@ -1,0 +1,15 @@
+<svg width="128" height="128" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body - using secondary color -->
+  <path d="M6 18C6 14 9 11 16 11C23 11 26 14 26 18V32H6V18Z" fill="#2d2d3a"/> 
+  <!-- Ears - using primary purple -->
+  <path d="M7 12L4 4L12 9L7 12Z" fill="#a78bfa"/>
+  <path d="M25 12L28 4L20 9L25 12Z" fill="#a78bfa"/>
+  <!-- Ear highlights - lighter purple -->
+  <path d="M7.5 10L6 6L10 8.5L7.5 10Z" fill="#c4b5fd"/>
+  <path d="M24.5 10L26 6L22 8.5L24.5 10Z" fill="#c4b5fd"/>
+  <!-- Eyes - using accent cyan (matches site theme perfectly!) -->
+  <circle cx="12" cy="19" r="1.5" fill="#5eead4"/>
+  <circle cx="20" cy="19" r="1.5" fill="#5eead4"/>
+  <!-- Hair/whiskers - using primary purple -->
+  <path d="M14 11V14M16 11V15M18 11V14" stroke="#a78bfa" stroke-width="1" stroke-linecap="round"/>
+</svg>

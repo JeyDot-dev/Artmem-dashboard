@@ -393,24 +393,27 @@ Pixiv images require a `Referer` header. The backend proxies images:
 To minimize API requests, the Pixiv data is fetched once and cached for the session:
 
 ```typescript
-// client/src/lib/api.ts
+// client/src/components/dashboard/PixivWidget.tsx
 // Pixiv query configuration
+const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
 const pixivQueryConfig = {
-  queryKey: ['pixiv', 'daily-ranking'],
+  queryKey: ['pixiv', 'daily-ranking', today], // Date in key ensures daily refresh
   queryFn: api.getPixivDailyRanking,
-  staleTime: Infinity,        // Never mark as stale
-  gcTime: Infinity,           // Never garbage collect (was cacheTime)
-  refetchOnMount: false,      // Don't refetch when component mounts
+  staleTime: 1000 * 60 * 60 * 12, // 12 hours - data is fresh for half a day
+  gcTime: 1000 * 60 * 60 * 24 * 2, // Keep cache for 2 days
+  refetchOnMount: true,      // Refetch when component mounts (if stale)
   refetchOnWindowFocus: false, // Don't refetch on window focus
-  refetchOnReconnect: false,  // Don't refetch on reconnect
+  refetchOnReconnect: true,  // Refetch if connection was lost
 };
 ```
 
 **Caching Behavior:**
-1. **Initial Load**: Fetch Top 15 illustrations once when app starts
-2. **Dashboard Navigation**: Use cached data, pick random image
-3. **Image Rotation**: Track `lastShownIndex` to avoid showing same image twice consecutively
-4. **Manual Refresh**: Optional button to invalidate cache and refetch
+1. **Daily Refresh**: Query key includes current date, automatically fetches fresh data each day
+2. **Same-Day Caching**: Data cached for 12 hours to avoid unnecessary refetches within the same day
+3. **Dashboard Navigation**: Use cached data from current day, pick random image
+4. **Image Rotation**: Track `previousIndices` to avoid showing same image twice consecutively
+5. **Manual Refresh**: Refresh button available to force immediate refetch
 
 ```typescript
 // client/src/components/dashboard/PixivWidget.tsx

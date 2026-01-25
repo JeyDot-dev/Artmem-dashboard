@@ -447,24 +447,28 @@ interface Tool {
 
 ### V3 Caching Strategy
 
-**Critical**: Minimize Pixiv API requests:
+**Critical**: Balance freshness with API request minimization:
 
 ```typescript
-// Query config for Pixiv data - fetch ONCE per session
+// Query config for Pixiv data - refetch daily
 {
-  staleTime: Infinity,
-  gcTime: Infinity,
-  refetchOnMount: false,
-  refetchOnWindowFocus: false,
+  queryKey: ['pixiv', 'daily-ranking', today], // Date in key ensures daily refresh
+  staleTime: 1000 * 60 * 60 * 12, // 12 hours - data is fresh for half a day
+  gcTime: 1000 * 60 * 60 * 24 * 2, // Keep cache for 2 days
+  refetchOnMount: true, // Refetch when component mounts (if stale)
+  refetchOnWindowFocus: false, // Don't refetch on window focus
+  refetchOnReconnect: true, // Refetch if connection was lost
 }
 ```
 
 **Behavior:**
-- Fetch Top 15 once on app initialization
-- Cache in TanStack Query for entire session
-- Each dashboard visit shows different random image from cache
+- Query key includes current date (YYYY-MM-DD), automatically changes daily
+- Fetch Top 15 illustrations - fresh data each day
+- Cache persists for 12 hours within the same day (avoids unnecessary refetches)
+- When date changes, query key changes and fresh data is fetched automatically
+- Each dashboard visit shows different random image from current day's cache
 - Bookmark toggle uses optimistic updates (update cache immediately)
-- No additional API calls unless user explicitly refreshes
+- Old cache entries kept for 2 days before garbage collection
 
 ---
 

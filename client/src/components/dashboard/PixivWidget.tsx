@@ -10,15 +10,18 @@ export function PixivWidget() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [previousIndices, setPreviousIndices] = useState<number[]>([]);
 
-  // Fetch Pixiv daily ranking with aggressive caching
+  // Get today's date string (YYYY-MM-DD) for cache invalidation
+  const today = new Date().toISOString().split('T')[0];
+
+  // Fetch Pixiv daily ranking - refetch daily by including date in query key
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['pixiv', 'daily-ranking'],
+    queryKey: ['pixiv', 'daily-ranking', today], // Date in key ensures daily refresh
     queryFn: api.getPixivDailyRanking,
-    staleTime: Infinity, // Never mark as stale
-    gcTime: Infinity, // Never garbage collect (replaces cacheTime)
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: 1000 * 60 * 60 * 12, // 12 hours - data is fresh for half a day
+    gcTime: 1000 * 60 * 60 * 24 * 2, // Keep cache for 2 days
+    refetchOnMount: true, // Refetch when component mounts (if stale)
+    refetchOnWindowFocus: false, // Don't refetch on window focus to avoid unnecessary requests
+    refetchOnReconnect: true, // Refetch if connection was lost and regained
   });
 
   const illustrations = data?.illustrations || [];

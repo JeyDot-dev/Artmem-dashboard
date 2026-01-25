@@ -14,8 +14,9 @@ export function Header({ onExportJSON, onExportTora, onImport, onHome }: HeaderP
       <div className="flex items-center justify-between">
         <button
           onClick={onHome}
-          className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:opacity-80 transition-opacity"
         >
+          <img src="/tora.svg" alt="Tora" className="h-10 w-10" />
           Tora-chan Art Study Dashboard
         </button>
         <div className="flex items-center gap-2">
