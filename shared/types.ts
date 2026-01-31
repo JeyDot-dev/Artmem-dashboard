@@ -208,3 +208,20 @@ export interface Tool {
   icon: string; // Icon name from lucide-react
   description?: string;
 }
+
+// V4 Types for Edit Mode
+export interface ReorderRequest {
+  sections: Array<{
+    id: number;
+    sortOrder: number;
+    items: Array<{
+      id: number;
+      sortOrder: number;
+    }>;
+  }>;
+}
+
+export interface ReorderResponse {
+  success: boolean;
+  curriculum: CurriculumDetail;
+}

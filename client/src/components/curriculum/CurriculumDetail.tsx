@@ -1,12 +1,15 @@
-import { Edit, Trash2, Plus, Video, BookOpen, Dumbbell, FileText, Circle } from 'lucide-react';
+import { Edit, Trash2, Plus, Video, BookOpen, Dumbbell, FileText, Circle, ListOrdered } from 'lucide-react';
 import { format } from 'date-fns';
-import { CurriculumDetail, ItemType } from '../../../../shared/types';
+import { CurriculumDetail, ItemType, ReorderRequest } from '../../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn, scrollToItem } from '@/lib/utils';
 import { DaysRemaining } from '../dashboard/DaysRemaining';
 import { CurrentTaskWidget } from './CurrentTaskWidget';
+import { EditModeProvider, useEditMode } from './edit-mode/EditModeProvider';
+import { EditModeView } from './edit-mode/EditModeView';
+import { EditModeFooter } from './edit-mode/EditModeFooter';
 
 interface CurriculumDetailViewProps {
   curriculum: CurriculumDetail;
@@ -19,6 +22,7 @@ interface CurriculumDetailViewProps {
   onEditItem: (itemId: number) => void;
   onDeleteItem: (itemId: number) => void;
   onCycleItemStatus: (itemId: number) => void;
+  onReorder: (curriculumId: number, data: ReorderRequest) => Promise<void>;
 }
 
 const itemTypeIcons: Record<ItemType, React.ReactNode> = {
@@ -41,7 +45,8 @@ const priorityColors = {
   low: 'text-muted-foreground',
 };
 
-export function CurriculumDetailView({
+// Inner component that uses useEditMode hook
+function CurriculumDetailContent({
   curriculum,
   onEdit,
   onDelete,
@@ -52,7 +57,8 @@ export function CurriculumDetailView({
   onEditItem,
   onDeleteItem,
   onCycleItemStatus,
-}: CurriculumDetailViewProps) {
+}: Omit<CurriculumDetailViewProps, 'onReorder'>) {
+  const { isEditMode, enterEditMode } = useEditMode();
   const totalItems = curriculum.sections.reduce((sum, s) => sum + s.items.length, 0);
   const completedItems = curriculum.sections.reduce(
     (sum, s) => sum + s.items.filter((i) => i.status === 'completed').length,
@@ -123,12 +129,25 @@ export function CurriculumDetailView({
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={onEdit}>
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button variant="destructive" size="icon" onClick={onDelete}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {!isEditMode && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => enterEditMode(curriculum)}
+                    className="gap-2"
+                  >
+                    <ListOrdered className="h-4 w-4" />
+                    Edit Order
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={onEdit}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="destructive" size="icon" onClick={onDelete}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -144,19 +163,27 @@ export function CurriculumDetailView({
         </CardHeader>
       </Card>
 
-      {/* Current Task Widget */}
-      <CurrentTaskWidget 
-        curriculum={curriculum} 
-        onTaskClick={(itemId) => scrollToItem(itemId)} 
-      />
+      {/* Show Edit Mode View or Normal View */}
+      {isEditMode ? (
+        <>
+          <EditModeView curriculum={curriculum} />
+          <EditModeFooter />
+        </>
+      ) : (
+        <>
+          {/* Current Task Widget */}
+          <CurrentTaskWidget 
+            curriculum={curriculum} 
+            onTaskClick={(itemId) => scrollToItem(itemId)} 
+          />
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Sections</h2>
-        <Button onClick={onAddSection}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Section
-        </Button>
-      </div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Sections</h2>
+            <Button onClick={onAddSection}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Section
+            </Button>
+          </div>
 
       {curriculum.sections.length === 0 ? (
         <Card>
@@ -262,6 +289,17 @@ export function CurriculumDetailView({
           ))}
         </div>
       )}
+        </>
+      )}
     </div>
+  );
+}
+
+// Wrapper component that provides EditModeProvider
+export function CurriculumDetailView(props: CurriculumDetailViewProps) {
+  return (
+    <EditModeProvider onSave={props.onReorder}>
+      <CurriculumDetailContent {...props} />
+    </EditModeProvider>
   );
 }

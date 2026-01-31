@@ -43,6 +43,10 @@ This document outlines the technical architecture, stack choices, and implementa
 | `shadcn/ui` | Accessible UI component primitives |
 | `zod` | Runtime type validation |
 | `clsx` / `tailwind-merge` | Conditional className utilities |
+| `@dnd-kit/core` | V4: Core drag-and-drop primitives |
+| `@dnd-kit/sortable` | V4: Sortable list utilities |
+| `framer-motion` | V4: Physics-based layout animations |
+| `canvas-confetti` | V4: Particle burst effects on drop |
 
 ### Backend Dependencies
 
@@ -660,6 +664,501 @@ const filteredCurriculums = useMemo(
 );
 ```
 
+### Curriculum Edit Mode (V4 Feature)
+
+A dedicated editing mode for reordering curriculum sections and items with physics-based drag-and-drop.
+
+#### Component Architecture
+
+```
+client/src/components/curriculum/
+├── CurriculumDetail.tsx        # Updated - Edit Mode toggle
+├── edit-mode/                   # NEW - Edit Mode components
+│   ├── EditModeProvider.tsx     # Context for edit mode state
+│   ├── EditModeFooter.tsx       # Floating controls bar
+│   ├── SortableSection.tsx      # Draggable section wrapper
+│   ├── SortableItem.tsx         # Draggable item wrapper
+│   └── DragHandle.tsx           # Reusable drag handle component
+└── ...
+```
+
+#### Core Dependencies Setup
+
+```bash
+# Install V4 dependencies
+pnpm add @dnd-kit/core @dnd-kit/sortable framer-motion canvas-confetti --filter client
+pnpm add -D @types/canvas-confetti --filter client
+```
+
+#### Edit Mode State Management
+
+```typescript
+// client/src/components/curriculum/edit-mode/EditModeProvider.tsx
+import { createContext, useContext, useState, useCallback } from 'react';
+import type { CurriculumDetail, SectionWithItems, Item } from '@shared/types';
+
+interface EditModeState {
+  isEditMode: boolean;
+  isDirty: boolean;
+  localCurriculum: CurriculumDetail | null;
+  collapsedSections: Set<number>;
+  allExpanded: boolean;
+}
+
+interface EditModeContextValue extends EditModeState {
+  enterEditMode: (curriculum: CurriculumDetail) => void;
+  exitEditMode: () => void;
+  reorderSections: (activeId: number, overId: number) => void;
+  reorderItems: (sectionId: number, activeId: number, overId: number) => void;
+  toggleAllSections: () => void;
+  collapseSection: (sectionId: number) => void;
+  save: () => Promise<void>;
+}
+
+const EditModeContext = createContext<EditModeContextValue | null>(null);
+
+export function EditModeProvider({ children, onSave }: {
+  children: React.ReactNode;
+  onSave: (data: ReorderRequest) => Promise<void>;
+}) {
+  const [state, setState] = useState<EditModeState>({
+    isEditMode: false,
+    isDirty: false,
+    localCurriculum: null,
+    collapsedSections: new Set(),
+    allExpanded: true,
+  });
+
+  const enterEditMode = useCallback((curriculum: CurriculumDetail) => {
+    // Deep clone to prevent mutations
+    setState({
+      isEditMode: true,
+      isDirty: false,
+      localCurriculum: JSON.parse(JSON.stringify(curriculum)),
+      collapsedSections: new Set(),
+      allExpanded: true,
+    });
+  }, []);
+
+  const exitEditMode = useCallback(() => {
+    if (state.isDirty) {
+      const confirmed = window.confirm(
+        'You have unsaved changes. Are you sure you want to exit?'
+      );
+      if (!confirmed) return;
+    }
+    setState({
+      isEditMode: false,
+      isDirty: false,
+      localCurriculum: null,
+      collapsedSections: new Set(),
+      allExpanded: true,
+    });
+  }, [state.isDirty]);
+
+  // ... reorderSections, reorderItems, save implementations
+  
+  return (
+    <EditModeContext.Provider value={{ ...state, enterEditMode, exitEditMode, /* ... */ }}>
+      {children}
+    </EditModeContext.Provider>
+  );
+}
+
+export function useEditMode() {
+  const context = useContext(EditModeContext);
+  if (!context) throw new Error('useEditMode must be used within EditModeProvider');
+  return context;
+}
+```
+
+#### Drag-and-Drop Implementation with DragOverlay
+
+**CRITICAL**: Always use `DragOverlay` for clear visual feedback during drag operations.
+
+```typescript
+// client/src/components/curriculum/edit-mode/EditModeView.tsx
+import { useState } from 'react';
+import { DndContext, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { motion } from 'framer-motion';
+
+export function EditModeView({ curriculum }: EditModeViewProps) {
+  const { localCurriculum, reorderSections } = useEditMode();
+  const [activeSection, setActiveSection] = useState<SectionWithItems | null>(null);
+
+  const handleSectionDragStart = (event: DragStartEvent) => {
+    const section = localCurriculum?.sections.find(s => s.id === event.active.id);
+    if (section) {
+      setActiveSection(section);
+      document.body.style.cursor = 'grabbing'; // Global cursor feedback
+    }
+  };
+
+  const handleSectionDragEnd = (event: DragEndEvent) => {
+    setActiveSection(null);
+    document.body.style.cursor = ''; // Reset cursor
+    // ... reorder logic
+  };
+
+  return (
+    <DndContext 
+      onDragStart={handleSectionDragStart}
+      onDragEnd={handleSectionDragEnd}
+    >
+      <SortableContext items={sectionIds}>
+        {sections.map(section => <SortableSection key={section.id} section={section} />)}
+      </SortableContext>
+
+      {/* DragOverlay shows clear visual feedback of what's being dragged */}
+      <DragOverlay dropAnimation={null}>
+        {activeSection ? (
+          <motion.div
+            initial={{ scale: 1 }}
+            animate={{ scale: 1.05, rotate: 2 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+            style={{ boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)' }}
+          >
+            <SectionPreview section={activeSection} />
+          </motion.div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+// client/src/components/curriculum/edit-mode/SortableSection.tsx
+export function SortableSection({ section }: SortableSectionProps) {
+  const { isDragging, /* ... */ } = useSortable({ id: section.id });
+
+  return (
+    <motion.div
+      layout
+      initial={false}
+      animate={{
+        opacity: isDragging ? 0.4 : 1, // Fade source element during drag
+        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+      }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+    >
+      <DragHandle attributes={attributes} listeners={listeners} />
+      {/* ... content */}
+    </motion.div>
+  );
+}
+
+// client/src/components/curriculum/edit-mode/DragHandle.tsx
+export function DragHandle({ attributes, listeners }: DragHandleProps) {
+  return (
+    <motion.div
+      className="cursor-grab active:cursor-grabbing hover:text-primary hover:bg-primary/10 p-1 rounded"
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical className="h-5 w-5" />
+    </motion.div>
+  );
+}
+```
+
+**Visual Feedback Improvements:**
+- **DragOverlay**: Clear visual representation of dragged item
+- **Source Opacity**: Original element fades to `0.4` during drag
+- **Global Cursor**: `cursor: grabbing` on `document.body` during drag
+- **Drag Handle Hover**: Scale, color change, and background on hover
+- **Prominent Shadow**: Large shadow on DragOverlay for depth
+- **Slight Rotation**: `rotate: 2deg` makes drag feel more dynamic
+
+#### Confetti Effect (Enhanced)
+
+```typescript
+// client/src/lib/confetti.ts
+import confetti from 'canvas-confetti';
+
+/**
+ * Fires a two-burst confetti effect centered on a given element.
+ * Much more satisfying than a single burst.
+ */
+export function fireDropConfetti(
+  element: HTMLElement,
+  options: { particleCount?: number; spread?: number } = {}
+) {
+  const rect = element.getBoundingClientRect();
+  const x = (rect.left + rect.width / 2) / window.innerWidth;
+  const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+  const { particleCount = 50, spread = 70 } = options;
+
+  // First burst (angle 60°)
+  confetti({
+    particleCount: Math.floor(particleCount / 2),
+    angle: 60,
+    spread,
+    origin: { x, y },
+    colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+    ticks: 120,
+    gravity: 1.3,
+    scalar: 1.2,
+    shapes: ['circle', 'square'],
+    disableForReducedMotion: true,
+  });
+
+  // Second burst (angle 120°) - slightly delayed for fuller effect
+  setTimeout(() => {
+    confetti({
+      particleCount: Math.floor(particleCount / 2),
+      angle: 120,
+      spread,
+      origin: { x, y },
+      colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+      ticks: 120,
+      gravity: 1.3,
+      scalar: 1.2,
+      shapes: ['circle', 'square'],
+      disableForReducedMotion: true,
+    });
+  }, 50);
+}
+
+// Usage: Fire confetti on item drop (not sections)
+useEffect(() => {
+  if (previousIsDragging.current && !isDragging && dragHandleRef.current) {
+    fireDropConfetti(dragHandleRef.current, { particleCount: 40, spread: 60 });
+  }
+  previousIsDragging.current = isDragging;
+}, [isDragging]);
+```
+
+**Confetti Improvements:**
+- **Two bursts**: More particles, fuller visual effect
+- **Vibrant colors**: Fixed color palette instead of theme-dependent HSL
+- **Customizable**: Options for particle count and spread
+- **Items only**: Sections don't fire confetti (too frequent, less meaningful)
+
+#### Floating Footer Component
+
+```typescript
+// client/src/components/curriculum/edit-mode/EditModeFooter.tsx
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronUp, X, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useEditMode } from './EditModeProvider';
+
+export function EditModeFooter() {
+  const { isEditMode, isDirty, allExpanded, toggleAllSections, exitEditMode, save } = useEditMode();
+
+  return (
+    <AnimatePresence>
+      {isEditMode && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        >
+          <div className="container flex items-center justify-between gap-4 py-3 px-4">
+            {/* Toggle Tasks */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleAllSections}
+              className="gap-2"
+            >
+              {allExpanded ? (
+                <>
+                  <ChevronUp className="h-4 w-4" />
+                  Collapse All
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4" />
+                  Expand All
+                </>
+              )}
+            </Button>
+
+            <div className="flex items-center gap-2">
+              {/* Exit Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={exitEditMode}
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                Exit
+              </Button>
+
+              {/* Save Button */}
+              <Button
+                size="sm"
+                onClick={save}
+                disabled={!isDirty}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Save
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+```
+
+#### API Endpoint Implementation
+
+```typescript
+// server/src/routes/curriculums.ts (addition)
+
+// Batch reorder sections and items
+router.patch('/:id/reorder', async (req, res) => {
+  const curriculumId = parseInt(req.params.id);
+  
+  const reorderSchema = z.object({
+    sections: z.array(z.object({
+      id: z.number(),
+      sortOrder: z.number(),
+      items: z.array(z.object({
+        id: z.number(),
+        sortOrder: z.number(),
+      })),
+    })),
+  });
+
+  const parsed = reorderSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error });
+  }
+
+  try {
+    const now = new Date();
+    
+    // Update sections sortOrder
+    for (const section of parsed.data.sections) {
+      await db
+        .update(sections)
+        .set({ sortOrder: section.sortOrder, updatedAt: now })
+        .where(
+          and(
+            eq(sections.id, section.id),
+            eq(sections.curriculumId, curriculumId)
+          )
+        );
+      
+      // Update items sortOrder within this section
+      for (const item of section.items) {
+        await db
+          .update(items)
+          .set({ sortOrder: item.sortOrder, updatedAt: now })
+          .where(
+            and(
+              eq(items.id, item.id),
+              eq(items.sectionId, section.id)
+            )
+          );
+      }
+    }
+
+    // Fetch and return updated curriculum
+    const curriculum = await getCurriculumWithSectionsAndItems(curriculumId);
+    res.json({ success: true, curriculum });
+  } catch (error) {
+    console.error('Reorder error:', error);
+    res.status(500).json({ error: 'Failed to reorder' });
+  }
+});
+```
+
+#### Frontend API Client
+
+```typescript
+// client/src/lib/api.ts (addition)
+
+export interface ReorderRequest {
+  sections: Array<{
+    id: number;
+    sortOrder: number;
+    items: Array<{
+      id: number;
+      sortOrder: number;
+    }>;
+  }>;
+}
+
+export async function reorderCurriculum(
+  curriculumId: number,
+  data: ReorderRequest
+): Promise<CurriculumDetail> {
+  const response = await fetch(`${API_BASE}/curriculums/${curriculumId}/reorder`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to reorder curriculum');
+  }
+  
+  const result = await response.json();
+  return result.curriculum;
+}
+```
+
+#### Type Definitions
+
+```typescript
+// shared/types.ts (additions)
+
+// V4: Reorder request type
+export interface ReorderRequest {
+  sections: Array<{
+    id: number;
+    sortOrder: number;
+    items: Array<{
+      id: number;
+      sortOrder: number;
+    }>;
+  }>;
+}
+
+// V4: Edit mode state
+export interface EditModeState {
+  isEditMode: boolean;
+  isDirty: boolean;
+  localCurriculum: CurriculumDetail | null;
+  collapsedSections: Set<number>;
+  allExpanded: boolean;
+}
+```
+
+#### Animation Constants
+
+```typescript
+// client/src/lib/animations.ts
+
+// Shared spring configuration for consistent physics
+export const springConfig = {
+  type: 'spring' as const,
+  stiffness: 300,
+  damping: 30,
+};
+
+// Drag elevation shadow
+export const dragShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
+
+// Default shadow
+export const defaultShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1)';
+
+// Scale during drag
+export const dragScale = 1.02;
+```
+
 ---
 
 ## 7. Configuration Management
@@ -754,6 +1253,7 @@ PIXIV_REFRESH_TOKEN=your_token_here
 | POST | `/api/curriculums` | Create curriculum |
 | PATCH | `/api/curriculums/:id` | Update curriculum |
 | DELETE | `/api/curriculums/:id` | Delete curriculum |
+| PATCH | `/api/curriculums/:id/reorder` | V4: Batch reorder sections and items |
 
 ### Section Endpoints
 

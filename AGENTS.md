@@ -29,6 +29,17 @@ artmem-dashboard/
 │   │   ├── components/
 │   │   │   ├── common/        # Shared components (ImportDropzone)
 │   │   │   ├── curriculum/    # Curriculum-related components
+│   │   │   │   ├── CurriculumDetail.tsx
+│   │   │   │   ├── CurriculumForm.tsx
+│   │   │   │   ├── CurrentTaskWidget.tsx
+│   │   │   │   ├── ItemForm.tsx
+│   │   │   │   ├── SectionForm.tsx
+│   │   │   │   └── edit-mode/          # V4: Edit mode components
+│   │   │   │       ├── EditModeProvider.tsx
+│   │   │   │       ├── EditModeFooter.tsx
+│   │   │   │       ├── SortableSection.tsx
+│   │   │   │       ├── SortableItem.tsx
+│   │   │   │       └── DragHandle.tsx
 │   │   │   ├── dashboard/     # Dashboard components (V2/V3)
 │   │   │   │   ├── Dashboard.tsx
 │   │   │   │   ├── CurriculumCard.tsx
@@ -43,7 +54,9 @@ artmem-dashboard/
 │   │   │   └── toolbox.ts     # V3: Hardcoded tool configurations
 │   │   ├── lib/
 │   │   │   ├── api.ts         # API client functions
-│   │   │   └── utils.ts       # Utility functions (cn, etc.)
+│   │   │   ├── utils.ts       # Utility functions (cn, etc.)
+│   │   │   ├── animations.ts  # V4: Animation constants
+│   │   │   └── confetti.ts    # V4: Confetti effect helper
 │   │   ├── styles/
 │   │   │   └── globals.css    # Global styles, CSS variables
 │   │   ├── App.tsx            # Main application component
@@ -516,6 +529,253 @@ const filteredCurriculums = filterCurriculums(curriculums, searchQuery);
 
 ---
 
+## V4 Implementation Notes
+
+### Curriculum Edit Mode
+
+A dedicated editing mode with physics-based drag-and-drop for reordering sections and items.
+
+### Key V4 Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `EditModeProvider` | `components/curriculum/edit-mode/EditModeProvider.tsx` | Edit mode state context |
+| `EditModeView` | `components/curriculum/edit-mode/EditModeView.tsx` | Main view with section DragOverlay |
+| `EditModeFooter` | `components/curriculum/edit-mode/EditModeFooter.tsx` | Floating control bar |
+| `SortableSection` | `components/curriculum/edit-mode/SortableSection.tsx` | Draggable section wrapper with item DragOverlay |
+| `SortableItem` | `components/curriculum/edit-mode/SortableItem.tsx` | Draggable item wrapper |
+| `DragHandle` | `components/curriculum/edit-mode/DragHandle.tsx` | Reusable interactive drag handle |
+
+### V4 Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `@dnd-kit/core` | Core drag-and-drop primitives |
+| `@dnd-kit/sortable` | Sortable list utilities |
+| `framer-motion` | Physics-based layout animations |
+| `canvas-confetti` | Particle burst effects on drop |
+
+### V4 Patterns
+
+#### Optimistic Local State
+
+Edit Mode uses a **local-first** approach:
+- Clone curriculum data on entering edit mode
+- All reordering updates local state only
+- `isDirty` flag tracks unsaved changes
+- Batch API call only on explicit "Save"
+
+```typescript
+// Pattern: Local state for drag operations
+const [localCurriculum, setLocalCurriculum] = useState<CurriculumDetail | null>(null);
+const [isDirty, setIsDirty] = useState(false);
+
+// On drag end - update local state only
+const handleDragEnd = (event: DragEndEvent) => {
+  const { active, over } = event;
+  if (!over || active.id === over.id) return;
+  
+  setLocalCurriculum((prev) => {
+    // ... reorder logic
+  });
+  setIsDirty(true);
+};
+```
+
+#### dnd-kit Sortable Context with DragOverlay Pattern
+
+**CRITICAL**: Always use `DragOverlay` for visual feedback during drag operations.
+
+```typescript
+// Pattern: Track active drag item and render DragOverlay
+const [activeItem, setActiveItem] = useState<Item | null>(null);
+
+<DndContext 
+  onDragStart={(e) => {
+    setActiveItem(findItemById(e.active.id));
+    document.body.style.cursor = 'grabbing';
+  }}
+  onDragEnd={(e) => {
+    setActiveItem(null);
+    document.body.style.cursor = '';
+    // ... handle reorder
+  }}
+>
+  <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+    {items.map((item) => (
+      <SortableItem key={item.id} item={item} />
+    ))}
+  </SortableContext>
+
+  {/* DragOverlay shows what's being dragged */}
+  <DragOverlay dropAnimation={null}>
+    {activeItem ? <ItemPreview item={activeItem} /> : null}
+  </DragOverlay>
+</DndContext>
+```
+
+**Why DragOverlay?**
+- Shows a clear visual representation of what's being dragged
+- Prevents glitchy transform animations on the source element
+- Allows source element to fade out (`opacity: 0.4`) while showing dragged copy
+- Better cursor feedback and overall UX
+
+#### Framer Motion Layout Animations
+
+```typescript
+// Use layout prop for automatic position animations
+<motion.div
+  layout
+  initial={false}
+  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+>
+  {content}
+</motion.div>
+
+// Animate drag state - source element fades when dragging
+animate={{
+  opacity: isDragging ? 0.4 : 1, // Fade source element
+  boxShadow: defaultShadow,
+}}
+
+// DragOverlay animations - snappier for better responsiveness
+<motion.div
+  initial={{ scale: 1 }}
+  animate={{ scale: 1.05, rotate: 2 }}
+  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+  style={{ boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)' }}
+>
+  {dragged content}
+</motion.div>
+```
+
+#### Confetti on Drop
+
+```typescript
+// Fire confetti centered on drag handle - TWO BURSTS for satisfying effect
+import confetti from 'canvas-confetti';
+
+function fireDropConfetti(element: HTMLElement, options = {}) {
+  const rect = element.getBoundingClientRect();
+  const { particleCount = 50, spread = 70 } = options;
+  
+  const x = (rect.left + rect.width / 2) / window.innerWidth;
+  const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+  // Fire two bursts with different angles for fuller effect
+  confetti({
+    particleCount: Math.floor(particleCount / 2),
+    angle: 60,
+    spread,
+    origin: { x, y },
+    colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+    ticks: 120,
+    gravity: 1.3,
+    scalar: 1.2,
+    disableForReducedMotion: true,
+  });
+  
+  setTimeout(() => {
+    confetti({
+      particleCount: Math.floor(particleCount / 2),
+      angle: 120,
+      spread,
+      origin: { x, y },
+      colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+      ticks: 120,
+      gravity: 1.3,
+      scalar: 1.2,
+      disableForReducedMotion: true,
+    });
+  }, 50);
+}
+
+// Usage: Fire on items only (not sections)
+useEffect(() => {
+  if (previousIsDragging.current && !isDragging && dragHandleRef.current) {
+    fireDropConfetti(dragHandleRef.current, { particleCount: 40, spread: 60 });
+  }
+  previousIsDragging.current = isDragging;
+}, [isDragging]);
+```
+
+#### Exit with Unsaved Changes Warning
+
+```typescript
+// Browser confirm dialog for unsaved changes
+const exitEditMode = () => {
+  if (isDirty) {
+    const confirmed = window.confirm(
+      'You have unsaved changes. Are you sure you want to exit?'
+    );
+    if (!confirmed) return;
+  }
+  // Reset state and exit
+};
+```
+
+#### Visual Feedback Best Practices
+
+**Drag Handle Improvements:**
+```typescript
+// Interactive drag handle with hover/tap feedback
+<motion.div
+  className="cursor-grab active:cursor-grabbing hover:text-primary hover:bg-primary/10"
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.95 }}
+>
+  <GripVertical className="h-5 w-5" />
+</motion.div>
+```
+
+**Critical Visual Feedback Elements:**
+1. **Cursor States**: 
+   - `cursor-grab` on hover
+   - `cursor-grabbing` during drag (set on `document.body`)
+   - Reset to default on drop
+
+2. **Opacity Changes**:
+   - Source element: `opacity: 0.4` during drag
+   - Makes it clear the item is being moved
+
+3. **DragOverlay Styling**:
+   - Scale: `1.05` (noticeable but not excessive)
+   - Slight rotation: `rotate: 2deg`
+   - Prominent shadow: `0 25px 50px -12px rgb(0 0 0 / 0.25)`
+   - Matches source element styling for consistency
+
+4. **Animation Tuning**:
+   - Stiffness: `400-500` (snappy response)
+   - Damping: `30-35` (smooth settle)
+   - No drop animation: `dropAnimation={null}` (instant feedback)
+
+### V4 API Endpoint
+
+```typescript
+// PATCH /api/curriculums/:id/reorder
+// Batch update sortOrder for sections and items
+interface ReorderRequest {
+  sections: Array<{
+    id: number;
+    sortOrder: number;
+    items: Array<{
+      id: number;
+      sortOrder: number;
+    }>;
+  }>;
+}
+```
+
+### V4 Accessibility Considerations
+
+- Drag handles must have `aria-label="Drag to reorder"`
+- Keyboard support for reordering (Tab + Space/Enter)
+- `disableForReducedMotion: true` for confetti
+- Focus trap in edit mode footer
+- Announce reorder changes to screen readers
+
+---
+
 ## Testing Notes
 
 Currently no automated tests. When adding tests:
@@ -593,6 +853,7 @@ cd shared && pnpm build
 | POST | `/api/curriculums` | Create curriculum |
 | PATCH | `/api/curriculums/:id` | Update curriculum |
 | DELETE | `/api/curriculums/:id` | Delete curriculum |
+| PATCH | `/api/curriculums/:id/reorder` | V4: Batch reorder sections/items |
 | POST | `/api/curriculums/:id/sections` | Create section |
 | POST | `/api/sections/:id/items` | Create item |
 | PATCH | `/api/items/:id/cycle` | Cycle item status |

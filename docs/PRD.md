@@ -350,6 +350,236 @@ A simple searchbar to filter curriculums displayed on the dashboard.
 
 ---
 
+## 6. V4 Features - Curriculum Edit Mode
+
+> A dedicated mode for reordering curriculum sections and items with a polished, physics-based drag-and-drop experience.
+
+### 6.1 Feature Overview
+
+**Curriculum Edit Mode** allows users to manually reorder their curriculum structure using an intuitive, visually satisfying drag-and-drop interface. This feature enhances the user experience by providing:
+
+- **Fine-grained control** over curriculum organization
+- **Satisfying physics-based** interactions with weighty animations
+- **Visual feedback** through confetti bursts and elevation effects
+- **Safe editing** with optimistic local state and explicit save action
+
+### 6.2 Entry/Exit Points
+
+**Entering Edit Mode:**
+- Button in Curriculum Detail view header: `Edit` icon + "Edit Order" label
+- Only visible when viewing a specific curriculum (not on Dashboard)
+
+**Exiting Edit Mode:**
+- "Exit" button in floating footer (with unsaved changes warning)
+- "Save" button in floating footer (saves and exits)
+- Browser back navigation (with unsaved changes warning)
+
+### 6.3 Scope of Movement
+
+| Element | Movement Constraints |
+|---------|---------------------|
+| **Sections** | Can be reordered within the curriculum |
+| **Items** | Can be reordered *strictly within* their parent section |
+
+**Important Constraints:**
+- Items **cannot** be moved between sections (maintaining data integrity)
+- Sections maintain their item structure during reordering
+- Empty sections can still be reordered
+
+### 6.4 State Management (Optimistic Local State)
+
+**Core Principle:** All reordering happens in local React state only. No API calls during drag operations.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Edit Mode State Flow                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   1. Enter Edit Mode                                         │
+│      └─> Clone curriculum data to local state                │
+│      └─> Initialize isDirty = false                          │
+│                                                              │
+│   2. During Drag Operations                                  │
+│      └─> Update local state only (optimistic)                │
+│      └─> Set isDirty = true on first change                  │
+│      └─> Trigger visual animations (framer-motion)           │
+│      └─> Fire confetti on drop (canvas-confetti)             │
+│                                                              │
+│   3. On Save                                                 │
+│      └─> Extract new sortOrder values                        │
+│      └─> Batch API call: PATCH /api/curriculums/:id/reorder  │
+│      └─> Invalidate TanStack Query cache                     │
+│      └─> Exit edit mode                                      │
+│                                                              │
+│   4. On Exit (without save)                                  │
+│      └─> If isDirty: Show browser confirm dialog             │
+│      └─> Discard local state changes                         │
+│      └─> Return to normal view                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 6.5 UI/UX Specifications
+
+#### 6.5.1 Library Stack
+
+| Library | Purpose | Version |
+|---------|---------|---------|
+| `@dnd-kit/core` | Core drag-and-drop primitives | Latest |
+| `@dnd-kit/sortable` | Sortable list utilities | Latest |
+| `framer-motion` | Physics-based animations | Latest |
+| `canvas-confetti` | Particle burst effects | Latest |
+
+#### 6.5.2 Section Auto-Collapse Behavior
+
+When dragging begins on a **Section**:
+1. All items within that section immediately hide (collapse)
+2. Section shrinks to just its header (title bar)
+3. Other sections remain in their current expand/collapse state
+4. **After drop:** The dragged section remains collapsed
+5. User can manually expand using "Toggle Tasks" button
+
+```
+Before Drag:                    During/After Drag:
+┌─────────────────┐            ┌─────────────────┐
+│ Section 1       │            │ Section 1       │  ◄── Collapsed
+│ ├─ Item 1.1     │            └─────────────────┘
+│ ├─ Item 1.2     │            ┌─────────────────┐
+│ └─ Item 1.3     │    ─────►  │ Section 2       │  ◄── Normal
+├─────────────────┤            │ ├─ Item 2.1     │
+│ Section 2       │            │ └─ Item 2.2     │
+│ ├─ Item 2.1     │            └─────────────────┘
+│ └─ Item 2.2     │
+└─────────────────┘
+```
+
+#### 6.5.3 Visual Feedback During Drag
+
+| State | Visual Effect |
+|-------|---------------|
+| **Drag Start** | Elevation increase via `box-shadow` spring animation |
+| **Dragging** | Subtle scale increase (1.02x), reduced opacity on placeholder |
+| **Drop Zone Hover** | Border highlight on valid drop targets |
+| **Drop Impact** | Confetti burst centered on drag handle |
+| **Settling** | Spring animation to final position (framer-motion `layout`) |
+
+#### 6.5.4 Confetti Specification
+
+```typescript
+// On successful drop
+confetti({
+  particleCount: 30,
+  spread: 50,
+  origin: { x: handleX, y: handleY }, // Centered on drag handle
+  colors: ['hsl(var(--primary))', 'hsl(var(--accent))'],
+  ticks: 100,
+  gravity: 1.2,
+  scalar: 0.8,
+  shapes: ['circle'],
+});
+```
+
+- **Trigger:** Only on successful drop (not on cancel)
+- **Location:** Centered on the drag handle element
+- **Intensity:** Subtle (30 particles, 50 spread)
+- **Colors:** Match app theme (primary + accent)
+
+### 6.6 Floating Footer Controls
+
+A fixed toolbar at the bottom of the screen, **only visible in Edit Mode**.
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                        Main Content Area                        │
+│                                                                  │
+│                                                                  │
+├──────────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌────────────┐  ┌────────────────────────┐  │
+│  │ Toggle Tasks │  │    Exit    │  │         Save           │  │
+│  │   (expand)   │  │            │  │  (primary, disabled    │  │
+│  │              │  │            │  │   until isDirty)       │  │
+│  └──────────────┘  └────────────┘  └────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+#### Button Specifications
+
+| Button | Icon | Behavior |
+|--------|------|----------|
+| **Toggle Tasks** | `ChevronDown` / `ChevronUp` | Expands/collapses ALL sections at once |
+| **Exit** | `X` | If `isDirty`: show `window.confirm()` warning. Then exit edit mode |
+| **Save** | `Save` | Disabled until `isDirty`. Executes batch update, invalidates cache, exits |
+
+**Footer Styling:**
+- Fixed position: `bottom-0`, `left-0`, `right-0`
+- Elevated appearance: subtle shadow, glass morphism optional
+- Responsive padding: accounts for sidebar width
+- Z-index: Above content, below modals
+
+### 6.7 API Endpoint
+
+**Batch Reorder Endpoint:**
+
+```
+PATCH /api/curriculums/:id/reorder
+```
+
+**Request Body:**
+```typescript
+interface ReorderRequest {
+  sections: Array<{
+    id: number;
+    sortOrder: number;
+    items: Array<{
+      id: number;
+      sortOrder: number;
+    }>;
+  }>;
+}
+```
+
+**Response:**
+```typescript
+interface ReorderResponse {
+  success: boolean;
+  curriculum: CurriculumDetail; // Updated curriculum with new sort orders
+}
+```
+
+**Backend Logic:**
+1. Validate curriculum exists and belongs to request
+2. Validate all section/item IDs belong to this curriculum
+3. Update `sortOrder` for all sections in a transaction
+4. Update `sortOrder` for all items in a transaction
+5. Return updated curriculum
+
+### 6.8 User Flow
+
+```
+1. User views a curriculum detail page
+2. User clicks "Edit Order" button in header
+3. UI transitions to Edit Mode:
+   - Floating footer appears (slides up)
+   - Drag handles become visible on sections and items
+   - Visual indicator shows "Edit Mode" is active
+4. User drags a section or item:
+   - If section: auto-collapses during drag
+   - Visual feedback: elevation, scale, shadow
+   - Other elements animate to make room
+5. User drops the element:
+   - Confetti burst on drop handle
+   - Element animates to final position
+   - isDirty flag set to true
+   - Save button becomes enabled
+6. User can continue reordering or:
+   a. Click "Save" → API call, cache invalidation, exit edit mode
+   b. Click "Exit" → Warning dialog if dirty, then discard changes
+   c. Click "Toggle Tasks" → Expand/collapse all sections
+7. After save: Normal view with new order persisted
+```
+
+---
+
 ## 6. User Stories
 
 ### Epic: Curriculum Management
@@ -409,6 +639,21 @@ A simple searchbar to filter curriculums displayed on the dashboard.
 | US-26 | As a user, I want the search to check title, author, and platform simultaneously so I don't need to remember exact field values | P1 |
 | US-27 | As a user, I want to type multiple words to narrow down results (AND logic) so I can be more specific | P1 |
 | US-28 | As a user, I want to see a clear indication when no curriculums match my search | P2 |
+
+### Epic: Curriculum Edit Mode (V4)
+
+| ID | Story | Priority |
+|----|-------|----------|
+| US-29 | As a user, I want to enter an "Edit Mode" to reorder my curriculum structure so I can organize content logically | P1 |
+| US-30 | As a user, I want to drag and drop sections to reorder them within a curriculum | P1 |
+| US-31 | As a user, I want to drag and drop items to reorder them within their section | P1 |
+| US-32 | As a user, I want sections to auto-collapse when I drag them so I can see the full curriculum structure | P2 |
+| US-33 | As a user, I want visual feedback (shadows, animations) during drag so the interaction feels responsive | P2 |
+| US-34 | As a user, I want a satisfying confetti effect when I drop an element so the action feels rewarding | P3 |
+| US-35 | As a user, I want a "Toggle Tasks" button to expand/collapse all sections at once | P2 |
+| US-36 | As a user, I want a warning before exiting edit mode with unsaved changes so I don't lose my work | P1 |
+| US-37 | As a user, I want changes to only save when I explicitly click "Save" so I have full control | P1 |
+| US-38 | As a user, I want the reordering to persist after page refresh once saved | P0 |
 
 ---
 
@@ -591,6 +836,7 @@ The following features are explicitly **not planned**:
 | 2.0 | Completed | Dashboard view, days remaining, current task widget |
 | 3.0 | Completed | Dashboard header row, Toolbox widget, Pixiv inspiration widget |
 | 3.1 | Completed | Dashboard search filter (title, author, platform) |
+| 4.0 | Completed | Curriculum Edit Mode: DND reordering with physics animations |
 
 ---
 

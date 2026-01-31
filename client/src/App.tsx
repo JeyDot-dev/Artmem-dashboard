@@ -9,7 +9,7 @@ import { SectionForm } from './components/curriculum/SectionForm';
 import { ItemForm } from './components/curriculum/ItemForm';
 import { ImportDropzone } from './components/common/ImportDropzone';
 import * as api from './lib/api';
-import type { Curriculum, Section, Item } from '../../shared/types';
+import type { Curriculum, Section, Item, ReorderRequest } from '../../shared/types';
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -111,6 +111,16 @@ export default function App() {
 
   const cycleItemStatusMutation = useMutation({
     mutationFn: api.cycleItemStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['curriculum', selectedCurriculumId] });
+      queryClient.invalidateQueries({ queryKey: ['curriculums'] });
+    },
+  });
+
+  // V4: Reorder curriculum mutation
+  const reorderCurriculumMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ReorderRequest }) => 
+      api.reorderCurriculum(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['curriculum', selectedCurriculumId] });
       queryClient.invalidateQueries({ queryKey: ['curriculums'] });
@@ -230,6 +240,9 @@ export default function App() {
                 }
               }}
               onCycleItemStatus={(itemId) => cycleItemStatusMutation.mutate(itemId)}
+              onReorder={async (curriculumId, data) => {
+                await reorderCurriculumMutation.mutateAsync({ id: curriculumId, data });
+              }}
             />
           ) : (
             <Dashboard

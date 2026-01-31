@@ -7,6 +7,8 @@ import type {
   CurriculumJSON,
   PixivIllustration,
   PixivRankingResponse,
+  ReorderRequest,
+  ReorderResponse,
 } from '../../../shared/types';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
@@ -51,6 +53,13 @@ export const updateCurriculum = (id: number, data: Partial<Curriculum>) =>
 
 export const deleteCurriculum = (id: number) =>
   fetchApi<void>(`/curriculums/${id}`, { method: 'DELETE' });
+
+// V4: Batch reorder curriculum sections and items
+export const reorderCurriculum = (id: number, data: ReorderRequest) =>
+  fetchApi<ReorderResponse>(`/curriculums/${id}/reorder`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
 
 // Sections
 export const createSection = (curriculumId: number, data: Partial<Section>) =>

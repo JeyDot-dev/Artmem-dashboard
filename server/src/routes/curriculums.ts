@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import { db, scheduleSave } from '../db/index.js';
 import { curriculums, sections, items } from '../db/schema.js';
 import { createCurriculumSchema, updateCurriculumSchema } from '../../../shared/types.js';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -178,6 +179,115 @@ router.delete('/curriculums/:id', async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.error('Failed to delete curriculum:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// V4: PATCH /api/curriculums/:id/reorder - Batch reorder sections and items
+router.patch('/curriculums/:id/reorder', async (req, res) => {
+  try {
+    const curriculumId = parseInt(req.params.id);
+    if (isNaN(curriculumId)) {
+      return res.status(400).json({ error: 'Invalid curriculum ID' });
+    }
+
+    // Validate request body
+    const reorderSchema = z.object({
+      sections: z.array(
+        z.object({
+          id: z.number(),
+          sortOrder: z.number(),
+          items: z.array(
+            z.object({
+              id: z.number(),
+              sortOrder: z.number(),
+            })
+          ),
+        })
+      ),
+    });
+
+    const result = reorderSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ error: result.error.issues });
+    }
+
+    const now = new Date();
+
+    // Update all sections and their items
+    for (const section of result.data.sections) {
+      // Update section sortOrder
+      await db
+        .update(sections)
+        .set({ sortOrder: section.sortOrder, updatedAt: now })
+        .where(
+          and(
+            eq(sections.id, section.id),
+            eq(sections.curriculumId, curriculumId)
+          )
+        );
+
+      // Update all items sortOrder within this section
+      for (const item of section.items) {
+        await db
+          .update(items)
+          .set({ sortOrder: item.sortOrder, updatedAt: now })
+          .where(
+            and(
+              eq(items.id, item.id),
+              eq(items.sectionId, section.id)
+            )
+          );
+      }
+    }
+
+    // Fetch and return updated curriculum
+    const curriculum = await db
+      .select()
+      .from(curriculums)
+      .where(eq(curriculums.id, curriculumId))
+      .get();
+
+    if (!curriculum) {
+      return res.status(404).json({ error: 'Curriculum not found' });
+    }
+
+    const allSections = await db
+      .select()
+      .from(sections)
+      .where(eq(sections.curriculumId, curriculumId))
+      .orderBy(sections.sortOrder);
+
+    const sectionsWithItems = await Promise.all(
+      allSections.map(async (section) => {
+        const sectionItems = await db
+          .select()
+          .from(items)
+          .where(eq(items.sectionId, section.id))
+          .orderBy(items.sortOrder);
+
+        const completedCount = sectionItems.filter((item) => item.status === 'completed').length;
+        const progress = sectionItems.length > 0 ? Math.round((completedCount / sectionItems.length) * 100) : 0;
+
+        return {
+          ...section,
+          items: sectionItems,
+          progress,
+        };
+      })
+    );
+
+    scheduleSave();
+
+    res.json({
+      success: true,
+      curriculum: {
+        ...curriculum,
+        sections: sectionsWithItems,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to reorder curriculum:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
