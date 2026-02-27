@@ -1,27 +1,92 @@
-// V4: Animation constants for Edit Mode
-// Shared spring configuration for consistent physics-based animations
+// V5: Animation constants — single source of truth for all spring/variant values.
+// Never hardcode spring values inline in components; always import from here.
 
-export const springConfig = {
+// ─── Spring Configurations ────────────────────────────────────────────────────
+
+/** Snappy — button taps, immediate feedback (stiff, well-damped) */
+export const tactileSpring = {
   type: 'spring' as const,
-  stiffness: 400,
+  stiffness: 500,
   damping: 30,
 };
 
-// Overlay drag spring - snappier for better responsiveness
-export const overlaySpringConfig = {
+/** Bouncy — drop placement, dialog open (overshoot then settle) */
+export const bounceSpring = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 15,
+};
+
+/** Gentle — layout shifts, sidebar, page transitions */
+export const gentleSpring = {
+  type: 'spring' as const,
+  stiffness: 200,
+  damping: 25,
+};
+
+/** Overlay — drag overlay responsiveness */
+export const overlaySpring = {
   type: 'spring' as const,
   stiffness: 500,
   damping: 35,
 };
 
-// Drag elevation shadow - applied during drag (much more prominent)
-export const dragShadow = '0 25px 50px -12px rgb(0 0 0 / 0.25), 0 12px 20px -8px rgb(0 0 0 / 0.15)';
+// ─── Legacy alias (used in EditModeView.tsx / SortableSection.tsx) ───────────
+/** @deprecated Use overlaySpring */
+export const overlaySpringConfig = overlaySpring;
+/** @deprecated Use tactileSpring */
+export const springConfig = tactileSpring;
 
-// Default shadow - normal state
-export const defaultShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1)';
+// ─── Animation Variants ───────────────────────────────────────────────────────
 
-// Scale during drag - more noticeable
+/** Fade in/out — for AnimatePresence wrappers */
+export const fadeVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+};
+
+/** Slide up — for modals, footers */
+export const slideUpVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1 },
+  exit: { y: 20, opacity: 0 },
+};
+
+/** Drop bounce — applied to an item after it is placed */
+export const dropBounceVariants = {
+  idle: { scale: 1 },
+  bounce: {
+    scale: [1, 1.06, 0.98, 1.01, 1] as number[],
+    transition: { duration: 0.4, ease: 'easeOut' as const },
+  },
+};
+
+// ─── Motion Values ────────────────────────────────────────────────────────────
+
+/** whileTap scale for all interactive elements */
+export const tapScale = { scale: 0.95 };
+/** whileHover scale for subtle lift */
+export const hoverScale = { scale: 1.02 };
+
+/** Source element opacity while being dragged (0.3 = slightly more dramatic than 0.4) */
+export const dragSourceOpacity = 0.3;
+/** DragOverlay scale while in flight */
 export const dragScale = 1.05;
+/** DragOverlay rotation in degrees */
+export const dragRotate = 2;
 
-// Opacity when element is being dragged from its original position
-export const dragSourceOpacity = 0.4;
+// ─── Shadow Values ────────────────────────────────────────────────────────────
+
+export const defaultShadow = 'none';
+export const hoverShadow = '0 4px 20px -4px rgba(250, 204, 21, 0.15)';
+export const dragShadow =
+  '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(250, 204, 21, 0.1)';
+
+// ─── Page Transition Props ────────────────────────────────────────────────────
+
+export const pageTransitionProps = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+  transition: gentleSpring,
+};

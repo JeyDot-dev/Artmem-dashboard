@@ -8,34 +8,47 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0f0f14',
+        background: '#0a0a0f',
         foreground: '#e8e6f0',
         card: {
-          DEFAULT: '#1a1a24',
+          DEFAULT: '#111118',
           foreground: '#e8e6f0',
         },
         primary: {
-          DEFAULT: '#a78bfa',
-          foreground: '#0f0f14',
+          DEFAULT: '#facc15',
+          foreground: '#0a0a0f',
         },
         secondary: {
-          DEFAULT: '#2d2d3a',
+          DEFAULT: '#1e1e2a',
           foreground: '#e8e6f0',
         },
         accent: {
-          DEFAULT: '#5eead4',
-          foreground: '#0f0f14',
+          DEFAULT: '#22d3ee',
+          foreground: '#0a0a0f',
         },
         muted: {
           DEFAULT: '#3f3f50',
-          foreground: '#a1a1aa',
+          foreground: '#71717a',
         },
         destructive: {
-          DEFAULT: '#f87171',
-          foreground: '#0f0f14',
+          DEFAULT: '#ef4444',
+          foreground: '#0a0a0f',
         },
-        border: '#2d2d3a',
-        ring: '#a78bfa',
+        success: {
+          DEFAULT: '#34d399',
+          foreground: '#0a0a0f',
+        },
+        warning: {
+          DEFAULT: '#fb923c',
+          foreground: '#0a0a0f',
+        },
+        'accent-pink': '#f472b6',
+        border: '#1e1e2a',
+        ring: '#facc15',
+      },
+      fontFamily: {
+        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
       },
       borderRadius: {
         lg: '0.75rem',

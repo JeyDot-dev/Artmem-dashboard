@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { CurriculumDetail, SectionWithItems, Item, ReorderRequest } from '../../../../../shared/types';
+import { CurriculumDetail, ReorderRequest } from '../../../../../shared/types';
 
 interface EditModeState {
   isEditMode: boolean;

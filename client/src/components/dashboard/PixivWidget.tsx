@@ -14,7 +14,7 @@ export function PixivWidget() {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch Pixiv daily ranking - refetch daily by including date in query key
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['pixiv', 'daily-ranking', today], // Date in key ensures daily refresh
     queryFn: api.getPixivDailyRanking,
     staleTime: 1000 * 60 * 60 * 12, // 12 hours - data is fresh for half a day
@@ -67,11 +67,6 @@ export function PixivWidget() {
     setCurrentIndex(nextIndex);
   };
 
-  const handleRefresh = () => {
-    refetch();
-    setPreviousIndices([]);
-    setCurrentIndex(0);
-  };
 
   if (error) {
     return (

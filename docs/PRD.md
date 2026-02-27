@@ -12,12 +12,13 @@
 2. [Target Users](#2-target-users)
 3. [Product Vision](#3-product-vision)
 4. [Core Features](#4-core-features)
-5. [V2 Features](#5-v2-features)
-6. [User Stories](#6-user-stories)
-7. [Information Architecture](#7-information-architecture)
-8. [Non-Functional Requirements](#8-non-functional-requirements)
-9. [Success Metrics](#9-success-metrics)
-10. [Out of Scope](#10-out-of-scope)
+5. [V2-V5 Features](#5-v2-v5-features)
+6. [V4 Features - Edit Mode](#6-v4-features---curriculum-edit-mode)
+7. [User Stories](#7-user-stories)
+8. [Information Architecture](#8-information-architecture)
+9. [Non-Functional Requirements](#9-non-functional-requirements)
+10. [Success Metrics](#10-success-metrics)
+11. [Out of Scope](#11-out-of-scope)
 
 ---
 
@@ -130,13 +131,15 @@ Curriculum
 
 ### 4.4 Item Types
 
-| Type | Icon | Use Case |
-|------|------|----------|
-| Video | 📹 | Video lessons, tutorials |
-| Reading | 📖 | Articles, book chapters |
-| Exercise | 🏋️ | Practice assignments |
-| Homework | 📝 | Graded assignments |
-| Other | ⚪ | Miscellaneous items |
+| Type | Use Case |
+|------|----------|
+| Video | Video lessons, tutorials |
+| Reading | Articles, book chapters |
+| Exercise | Practice assignments |
+| Homework | Graded assignments |
+| Other | Miscellaneous items |
+
+Icons are provided by lucide-react (no emojis).
 
 ### 4.5 Import/Export
 
@@ -151,17 +154,17 @@ Curriculum
 ```markdown
 # Tora-chan Art Study Progress
 
-## 📊 Ongoing Curriculums
+## Ongoing Curriculums
 
 ### Curriculum Title (65%)
-- Section 1 (100%): ✓ Item 1, ✓ Item 2
-- Section 2 (50%): ✓ Item 1, ▶ Item 2, ☐ Item 3
+- Section 1 (100%): [x] Item 1, [x] Item 2
+- Section 2 (50%): [x] Item 1, [>] Item 2, [ ] Item 3
 
-## ⏸️ Standby Curriculums
+## Standby Curriculums
 - Curriculum A (30% complete)
 - Curriculum B (0% complete)
 
-## 📋 Planned Curriculums
+## Planned Curriculums
 - Future Course 1
 - Future Course 2
 ```
@@ -171,12 +174,12 @@ Curriculum
 - **Sidebar**: Collapsible, grouped by curriculum status
 - **Main Content**: Curriculum detail view with sections and items
 - **Header**: Export buttons, import toggle
-- **Theme**: Dark mode with purple/teal accent colors
+- **Theme**: ZZZ-inspired "Digital Doujin" — void-black background with electric yellow, neon cyan, and hot pink accents (see `docs/DESIGN-SYSTEM.md`)
 - **Responsive**: Adapts to different screen sizes
 
 ---
 
-## 5. V2 Features
+## 5. V2-V5 Features
 
 > See [V2-FEATURES.md](./V2-FEATURES.md) for detailed specification.
 
@@ -350,6 +353,20 @@ A simple searchbar to filter curriculums displayed on the dashboard.
 
 ---
 
+### 5.9 V5 Design System Overhaul
+
+V5 is a complete visual and interaction overhaul with no new features. See [`docs/DESIGN-SYSTEM.md`](./DESIGN-SYSTEM.md) for the authoritative specification.
+
+**Key changes:**
+- Color palette: electric yellow (`#facc15`), neon cyan (`#22d3ee`), hot pink (`#f472b6`) on void black (`#0a0a0f`)
+- Typography: Space Grotesk (body) + JetBrains Mono (numeric data)
+- Particle system: `canvas-confetti` replaced with custom `DropParticles` (framer-motion neon dots)
+- Animation: spring physics throughout, 3D card tilt, breathing indicators, page transitions
+- Every interactive element: `whileTap={{ scale: 0.95 }}`
+- Full `prefers-reduced-motion` accessibility support
+
+---
+
 ## 6. V4 Features - Curriculum Edit Mode
 
 > A dedicated mode for reordering curriculum sections and items with a polished, physics-based drag-and-drop experience.
@@ -360,7 +377,7 @@ A simple searchbar to filter curriculums displayed on the dashboard.
 
 - **Fine-grained control** over curriculum organization
 - **Satisfying physics-based** interactions with weighty animations
-- **Visual feedback** through confetti bursts and elevation effects
+- **Visual feedback** through neon particle bursts and elevation effects
 - **Safe editing** with optimistic local state and explicit save action
 
 ### 6.2 Entry/Exit Points
@@ -423,12 +440,11 @@ A simple searchbar to filter curriculums displayed on the dashboard.
 
 #### 6.5.1 Library Stack
 
-| Library | Purpose | Version |
-|---------|---------|---------|
-| `@dnd-kit/core` | Core drag-and-drop primitives | Latest |
-| `@dnd-kit/sortable` | Sortable list utilities | Latest |
-| `framer-motion` | Physics-based animations | Latest |
-| `canvas-confetti` | Particle burst effects | Latest |
+| Library | Purpose |
+|---------|---------|
+| `@dnd-kit/core` | Core drag-and-drop primitives |
+| `@dnd-kit/sortable` | Sortable list utilities |
+| `framer-motion` | Physics-based animations, particle system |
 
 #### 6.5.2 Section Auto-Collapse Behavior
 
@@ -460,29 +476,18 @@ Before Drag:                    During/After Drag:
 | **Drag Start** | Elevation increase via `box-shadow` spring animation |
 | **Dragging** | Subtle scale increase (1.02x), reduced opacity on placeholder |
 | **Drop Zone Hover** | Border highlight on valid drop targets |
-| **Drop Impact** | Confetti burst centered on drag handle |
+| **Drop Impact** | Neon particle burst centered on drag handle (`DropParticles`) |
 | **Settling** | Spring animation to final position (framer-motion `layout`) |
 
-#### 6.5.4 Confetti Specification
+#### 6.5.4 Drop Particle Effect
 
-```typescript
-// On successful drop
-confetti({
-  particleCount: 30,
-  spread: 50,
-  origin: { x: handleX, y: handleY }, // Centered on drag handle
-  colors: ['hsl(var(--primary))', 'hsl(var(--accent))'],
-  ticks: 100,
-  gravity: 1.2,
-  scalar: 0.8,
-  shapes: ['circle'],
-});
-```
+On successful drop, a `DropParticles` component fires from the drag handle:
 
 - **Trigger:** Only on successful drop (not on cancel)
 - **Location:** Centered on the drag handle element
-- **Intensity:** Subtle (30 particles, 50 spread)
-- **Colors:** Match app theme (primary + accent)
+- **Particles:** 6-8 small neon dots (3-5px), scatter radially, fade out
+- **Colors:** Primary yellow, accent cyan, accent pink (palette-consistent)
+- **Implementation:** Pure framer-motion, no external dependencies. See `docs/DESIGN-SYSTEM.md` Section 7.
 
 ### 6.6 Floating Footer Controls
 
@@ -567,7 +572,7 @@ interface ReorderResponse {
    - Visual feedback: elevation, scale, shadow
    - Other elements animate to make room
 5. User drops the element:
-   - Confetti burst on drop handle
+   - Neon particle burst on drop handle
    - Element animates to final position
    - isDirty flag set to true
    - Save button becomes enabled
@@ -580,7 +585,7 @@ interface ReorderResponse {
 
 ---
 
-## 6. User Stories
+## 7. User Stories
 
 ### Epic: Curriculum Management
 
@@ -649,7 +654,7 @@ interface ReorderResponse {
 | US-31 | As a user, I want to drag and drop items to reorder them within their section | P1 |
 | US-32 | As a user, I want sections to auto-collapse when I drag them so I can see the full curriculum structure | P2 |
 | US-33 | As a user, I want visual feedback (shadows, animations) during drag so the interaction feels responsive | P2 |
-| US-34 | As a user, I want a satisfying confetti effect when I drop an element so the action feels rewarding | P3 |
+| US-34 | As a user, I want a satisfying particle effect when I drop an element so the action feels rewarding | P3 |
 | US-35 | As a user, I want a "Toggle Tasks" button to expand/collapse all sections at once | P2 |
 | US-36 | As a user, I want a warning before exiting edit mode with unsaved changes so I don't lose my work | P1 |
 | US-37 | As a user, I want changes to only save when I explicitly click "Save" so I have full control | P1 |
@@ -657,7 +662,7 @@ interface ReorderResponse {
 
 ---
 
-## 7. Information Architecture
+## 8. Information Architecture
 
 ### Data Model
 
@@ -729,7 +734,7 @@ interface ReorderResponse {
 
 ---
 
-## 8. Non-Functional Requirements
+## 9. Non-Functional Requirements
 
 ### Performance
 
@@ -768,7 +773,7 @@ interface ReorderResponse {
 
 ---
 
-## 9. Success Metrics
+## 10. Success Metrics
 
 ### Adoption Metrics
 
@@ -796,7 +801,7 @@ interface ReorderResponse {
 
 ---
 
-## 10. Out of Scope
+## 11. Out of Scope
 
 The following features are explicitly **not planned**:
 
@@ -837,11 +842,14 @@ The following features are explicitly **not planned**:
 | 3.0 | Completed | Dashboard header row, Toolbox widget, Pixiv inspiration widget |
 | 3.1 | Completed | Dashboard search filter (title, author, platform) |
 | 4.0 | Completed | Curriculum Edit Mode: DND reordering with physics animations |
+| 5.0 | Completed | Design system overhaul: ZZZ palette, typography, animations, DropParticles |
 
 ---
 
 ## Appendix C: Related Documents
 
-- [V2-FEATURES.md](./V2-FEATURES.md) - Detailed V2 feature specification
+- [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) - V5 design system specification
+- [V2-FEATURES.md](./V2-FEATURES.md) - V2 feature specification (historical)
+- [TECH.md](./TECH.md) - Technical stack and architecture
 - [README.md](../README.md) - Setup and usage guide
 - [AGENTS.md](../AGENTS.md) - AI coding assistant guidelines

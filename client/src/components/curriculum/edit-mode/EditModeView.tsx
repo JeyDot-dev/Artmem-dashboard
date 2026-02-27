@@ -8,13 +8,13 @@ import { useEditMode } from './EditModeProvider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { GripVertical } from 'lucide-react';
-import { overlaySpringConfig, dragShadow } from '@/lib/animations';
+import { overlaySpring, dragShadow } from '@/lib/animations';
 
 interface EditModeViewProps {
   curriculum: CurriculumDetail;
 }
 
-export function EditModeView({ curriculum }: EditModeViewProps) {
+export function EditModeView({ curriculum: _curriculum }: EditModeViewProps) {
   const { localCurriculum, reorderSections } = useEditMode();
   const [activeSection, setActiveSection] = useState<SectionWithItems | null>(null);
 
@@ -94,10 +94,10 @@ export function EditModeView({ curriculum }: EditModeViewProps) {
             {activeSection ? (
               <motion.div
                 initial={{ scale: 1 }}
-                animate={{ scale: 1.05, rotate: 2 }}
-                transition={overlaySpringConfig}
-                className="rounded-lg border bg-card shadow-2xl"
-                style={{ boxShadow: dragShadow }}
+                animate={{ scale: 1.04, rotate: 1.5 }}
+                transition={overlaySpring}
+                className="rounded-lg border border-primary/40 bg-card"
+                style={{ boxShadow: dragShadow, outline: '1px solid rgba(250, 204, 21, 0.2)' }}
               >
                 <div className="flex items-center gap-3 p-4 border-b">
                   <div className="text-muted-foreground cursor-grabbing">

@@ -1,8 +1,10 @@
 # Artmem Dashboard V2 - Feature Specification
 
+> **Status: Fully Implemented.** This document is retained as a historical reference for V2 design decisions.
+
 ## Overview
 
-V2 introduces a comprehensive **Dashboard/Home View** that provides an at-a-glance overview of all curriculums, enhanced curriculum details with **days remaining countdown**, and a new **Current Task Widget** for quick navigation to active tasks.
+V2 introduced the **Dashboard/Home View** with an at-a-glance overview of all curriculums, **days remaining countdown**, and the **Current Task Widget** for quick navigation to active tasks.
 
 ---
 
@@ -34,18 +36,18 @@ The Dashboard is the new default landing page when no curriculum is selected. It
 │          │  DASHBOARD                                             │
 │          │  ─────────────────────────────────────────────────────│
 │          │                                                        │
-│ SIDEBAR  │  📊 Ongoing (3)                                        │
+│ SIDEBAR  │  [TrendingUp] Ongoing (3)                              │
 │          │  ┌─────────┐ ┌─────────┐ ┌─────────┐                  │
 │          │  │ Card 1  │ │ Card 2  │ │ Card 3  │                  │
 │          │  │ + Task  │ │ + Task  │ │ + Task  │                  │
 │          │  └─────────┘ └─────────┘ └─────────┘                  │
 │          │                                                        │
-│          │  ⏸️ Standby (2)                                        │
+│          │  [Pause] Standby (2)                                   │
 │          │  ┌─────────┐ ┌─────────┐                              │
 │          │  │ Card 4  │ │ Card 5  │                              │
 │          │  └─────────┘ └─────────┘                              │
 │          │                                                        │
-│          │  📋 Planned (1)                                        │
+│          │  [ClipboardList] Planned (1)                           │
 │          │  ┌─────────┐                                          │
 │          │  │ Card 6  │                                          │
 │          │  └─────────┘                                          │

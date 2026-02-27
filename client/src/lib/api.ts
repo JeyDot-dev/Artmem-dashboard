@@ -5,7 +5,6 @@ import type {
   Section,
   Item,
   CurriculumJSON,
-  PixivIllustration,
   PixivRankingResponse,
   ReorderRequest,
   ReorderResponse,

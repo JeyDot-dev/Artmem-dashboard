@@ -14,7 +14,7 @@ export function EditModeFooter() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+          className="fixed bottom-0 left-0 right-0 z-40 border-t border-primary/30 bg-background/95 backdrop-blur shadow-[0_-4px_20px_rgba(250,204,21,0.08)]"
         >
           <div className="container flex items-center justify-between gap-4 py-3 px-4">
             {/* Toggle Tasks Button */}
@@ -49,16 +49,32 @@ export function EditModeFooter() {
                 Exit
               </Button>
 
-              {/* Save Button */}
-              <Button
-                size="sm"
-                onClick={save}
-                disabled={!isDirty}
-                className="gap-2"
+              {/* Save Button — pulses when dirty */}
+              <motion.div
+                animate={
+                  isDirty
+                    ? {
+                        boxShadow: [
+                          '0 0 0px rgba(250,204,21,0)',
+                          '0 0 12px rgba(250,204,21,0.4)',
+                          '0 0 0px rgba(250,204,21,0)',
+                        ],
+                      }
+                    : { boxShadow: '0 0 0px rgba(250,204,21,0)' }
+                }
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="rounded-lg"
               >
-                <Save className="h-4 w-4" />
-                Save
-              </Button>
+                <Button
+                  size="sm"
+                  onClick={save}
+                  disabled={!isDirty}
+                  className="gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  Save
+                </Button>
+              </motion.div>
             </div>
           </div>
         </motion.div>

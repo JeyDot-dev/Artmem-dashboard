@@ -1,5 +1,7 @@
 import { Download, FileJson, Package } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { tactileSpring } from '@/lib/animations';
 
 interface HeaderProps {
   onExportJSON: () => void;
@@ -12,13 +14,22 @@ export function Header({ onExportJSON, onExportTora, onImport, onHome }: HeaderP
   return (
     <header className="border-b border-border bg-card px-6 py-4">
       <div className="flex items-center justify-between">
-        <button
+        <motion.button
           onClick={onHome}
-          className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+          whileTap={{ scale: 0.97 }}
+          transition={tactileSpring}
+          className="flex items-center gap-2 group"
         >
-          <img src="/tora.svg" alt="Tora" className="h-10 w-10" />
-          Tora-chan Art Study Dashboard
-        </button>
+          <img
+            src="/tora.svg"
+            alt="Tora"
+            className="h-10 w-10 transition-transform duration-300 group-hover:rotate-12"
+          />
+          <span className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-accent-pink bg-clip-text text-transparent">
+            Tora-chan Art Study Dashboard
+          </span>
+        </motion.button>
+
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={onImport}>
             <Download className="h-4 w-4 mr-2" />

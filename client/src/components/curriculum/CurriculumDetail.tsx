@@ -1,10 +1,13 @@
-import { Edit, Trash2, Plus, Video, BookOpen, Dumbbell, FileText, Circle, ListOrdered } from 'lucide-react';
+import { useState } from 'react';
+import { Edit, Trash2, Plus, Video, BookOpen, Dumbbell, FileText, Circle, ListOrdered, CheckCircle2, Play, Square } from 'lucide-react';
 import { format } from 'date-fns';
-import { CurriculumDetail, ItemType, ReorderRequest } from '../../../../shared/types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CurriculumDetail, ItemType, ItemStatus, ReorderRequest } from '../../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn, scrollToItem } from '@/lib/utils';
+import { tactileSpring } from '@/lib/animations';
 import { DaysRemaining } from '../dashboard/DaysRemaining';
 import { CurrentTaskWidget } from './CurrentTaskWidget';
 import { EditModeProvider, useEditMode } from './edit-mode/EditModeProvider';
@@ -33,17 +36,71 @@ const itemTypeIcons: Record<ItemType, React.ReactNode> = {
   other: <Circle className="h-4 w-4" />,
 };
 
-const statusIcons = {
-  not_started: '☐',
-  in_progress: '▶',
-  completed: '✓',
+const statusIconMap: Record<ItemStatus, React.ReactNode> = {
+  not_started: <Square className="h-4 w-4" />,
+  in_progress: <Play className="h-4 w-4" />,
+  completed: <CheckCircle2 className="h-4 w-4" />,
 };
 
-const priorityColors = {
+const priorityColors: Record<string, string> = {
   high: 'text-destructive',
-  medium: 'text-accent',
+  medium: 'text-primary',
   low: 'text-muted-foreground',
 };
+
+const statusColors: Record<string, string> = {
+  ongoing: 'text-primary bg-primary/10',
+  standby: 'text-warning bg-warning/10',
+  planned: 'text-accent bg-accent/10',
+  wishlist: 'text-accent-pink bg-accent-pink/10',
+  completed: 'text-success bg-success/10',
+};
+
+/** Status cycle button with ring-pulse animation on click */
+function StatusCycleButton({
+  item,
+  onCycle,
+}: {
+  item: CurriculumDetail['sections'][number]['items'][number];
+  onCycle: () => void;
+}) {
+  const [isPulsing, setIsPulsing] = useState(false);
+
+  const handleClick = () => {
+    onCycle();
+    setIsPulsing(true);
+    setTimeout(() => setIsPulsing(false), 450);
+  };
+
+  return (
+    <div className="relative">
+      <AnimatePresence>
+        {isPulsing && (
+          <motion.div
+            className="absolute inset-0 rounded-md border-2 border-primary pointer-events-none"
+            initial={{ opacity: 0.8, scale: 1 }}
+            animate={{ opacity: 0, scale: 1.6 }}
+            exit={{}}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          />
+        )}
+      </AnimatePresence>
+      <motion.button
+        onClick={handleClick}
+        whileTap={{ scale: 0.95 }}
+        transition={tactileSpring}
+        className={cn(
+          'flex items-center justify-center w-8 h-8 rounded-md border-2 transition-colors',
+          item.status === 'completed' && 'bg-success/10 border-success text-success',
+          item.status === 'in_progress' && 'bg-primary/10 border-primary text-primary status-in-progress',
+          item.status === 'not_started' && 'border-muted text-muted-foreground hover:border-primary/50'
+        )}
+      >
+        {statusIconMap[item.status]}
+      </motion.button>
+    </div>
+  );
+}
 
 // Inner component that uses useEditMode hook
 function CurriculumDetailContent({
@@ -72,7 +129,7 @@ function CurriculumDetailContent({
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <CardTitle className="text-3xl">
                   {curriculum.platformUrl ? (
                     <a
@@ -87,10 +144,13 @@ function CurriculumDetailContent({
                     curriculum.title
                   )}
                 </CardTitle>
-                <span className={cn('text-sm font-medium', priorityColors[curriculum.priority])}>
+                <span className={cn('text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm', priorityColors[curriculum.priority])}>
                   {curriculum.priority.toUpperCase()}
                 </span>
-                <span className="text-sm px-2 py-1 rounded-md bg-secondary">
+                <span className={cn(
+                  'text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-sm',
+                  statusColors[curriculum.status] || 'text-muted-foreground bg-secondary'
+                )}>
                   {curriculum.status}
                 </span>
               </div>
@@ -122,13 +182,21 @@ function CurriculumDetailContent({
               {curriculum.endDate && (
                 <div className="mt-2 flex items-center gap-3">
                   <span className="text-sm text-muted-foreground">
-                    Goal: {format(typeof curriculum.endDate === 'string' ? new Date(curriculum.endDate) : curriculum.endDate, 'MMM d, yyyy')}
+                    Goal:{' '}
+                    <span className="font-mono">
+                      {format(
+                        typeof curriculum.endDate === 'string'
+                          ? new Date(curriculum.endDate)
+                          : curriculum.endDate,
+                        'MMM d, yyyy'
+                      )}
+                    </span>
                   </span>
                   <DaysRemaining endDate={curriculum.endDate} />
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               {!isEditMode && (
                 <>
                   <Button
@@ -154,8 +222,8 @@ function CurriculumDetailContent({
           <div className="space-y-2 mt-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Overall Progress</span>
-              <span className="font-medium">
-                {completedItems}/{totalItems} items ({progress}%)
+              <span className="font-mono font-medium">
+                {completedItems}/{totalItems} items (<span>{progress}%</span>)
               </span>
             </div>
             <Progress value={progress} />
@@ -172,9 +240,9 @@ function CurriculumDetailContent({
       ) : (
         <>
           {/* Current Task Widget */}
-          <CurrentTaskWidget 
-            curriculum={curriculum} 
-            onTaskClick={(itemId) => scrollToItem(itemId)} 
+          <CurrentTaskWidget
+            curriculum={curriculum}
+            onTaskClick={(itemId) => scrollToItem(itemId)}
           />
 
           <div className="flex items-center justify-between">
@@ -185,110 +253,107 @@ function CurriculumDetailContent({
             </Button>
           </div>
 
-      {curriculum.sections.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            No sections yet. Add your first section to start organizing your curriculum.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {curriculum.sections.map((section) => (
-            <Card key={section.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl">{section.title}</CardTitle>
-                    {section.description && (
-                      <CardDescription className="mt-1">{section.description}</CardDescription>
-                    )}
-                    <div className="flex items-center gap-4 mt-3 text-sm">
-                      <span className="text-muted-foreground">
-                        Progress: {section.items.filter((i) => i.status === 'completed').length}/
-                        {section.items.length} ({section.progress}%)
-                      </span>
-                      <Progress value={section.progress} className="flex-1 max-w-xs" />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => onAddItem(section.id)}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Item
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onEditSection(section.id)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDeleteSection(section.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-
-              {section.items.length > 0 && (
-                <CardContent>
-                  <div className="space-y-2">
-                    {section.items.map((item) => (
-                      <div
-                        key={item.id}
-                        data-item-id={item.id}
-                        className={cn(
-                          'flex items-center gap-3 p-3 rounded-lg border transition-colors group',
-                          item.status === 'completed' && 'bg-secondary/50 border-accent/20',
-                          item.status === 'in_progress' && 'bg-primary/5 border-primary/20',
-                          item.status === 'not_started' && 'border-border hover:bg-secondary/30'
+          {curriculum.sections.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                No sections yet. Add your first section to start organizing your curriculum.
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {curriculum.sections.map((section) => (
+                <Card key={section.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl">{section.title}</CardTitle>
+                        {section.description && (
+                          <CardDescription className="mt-1">{section.description}</CardDescription>
                         )}
-                      >
-                        <button
-                          onClick={() => onCycleItemStatus(item.id)}
-                          className={cn(
-                            'flex items-center justify-center w-8 h-8 rounded-md border-2 transition-all hover:scale-110',
-                            item.status === 'completed' && 'bg-accent border-accent text-accent-foreground',
-                            item.status === 'in_progress' && 'bg-primary border-primary text-primary-foreground',
-                            item.status === 'not_started' && 'border-muted'
-                          )}
-                        >
-                          <span className="text-lg font-bold">{statusIcons[item.status]}</span>
-                        </button>
-
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          {itemTypeIcons[item.type]}
-                        </div>
-
-                        <div className="flex-1">
-                          <p className={cn('font-medium', item.status === 'completed' && 'line-through text-muted-foreground')}>
-                            {item.title}
-                          </p>
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                          )}
-                        </div>
-
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" onClick={() => onEditItem(item.id)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onDeleteItem(item.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        <div className="flex items-center gap-4 mt-3 text-sm">
+                          <span className="text-muted-foreground">
+                            Progress:{' '}
+                            <span className="font-mono">
+                              {section.items.filter((i) => i.status === 'completed').length}/
+                              {section.items.length}
+                            </span>{' '}
+                            (<span className="font-mono">{section.progress}%</span>)
+                          </span>
+                          <Progress value={section.progress} className="flex-1 max-w-xs" />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
+                      <div className="flex gap-2 shrink-0">
+                        <Button variant="ghost" size="sm" onClick={() => onAddItem(section.id)}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Item
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => onEditSection(section.id)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDeleteSection(section.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  {section.items.length > 0 && (
+                    <CardContent>
+                      <div className="space-y-2">
+                        {section.items.map((item) => (
+                          <div
+                            key={item.id}
+                            data-item-id={item.id}
+                            className={cn(
+                              'flex items-center gap-3 p-3 rounded-lg border transition-colors group',
+                              item.status === 'completed' && 'border-success/20',
+                              item.status === 'in_progress' && 'bg-primary/5 border-primary/20',
+                              item.status === 'not_started' && 'border-border hover:bg-secondary/30'
+                            )}
+                          >
+                            <StatusCycleButton item={item} onCycle={() => onCycleItemStatus(item.id)} />
+
+                            <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+                              {itemTypeIcons[item.type]}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
+                                'font-medium truncate',
+                                item.status === 'completed' && 'line-through text-muted-foreground'
+                              )}>
+                                {item.title}
+                              </p>
+                              {item.description && (
+                                <p className="text-sm text-muted-foreground truncate">{item.description}</p>
+                              )}
+                            </div>
+
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                              <Button variant="ghost" size="icon" onClick={() => onEditItem(item.id)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => onDeleteItem(item.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

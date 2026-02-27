@@ -67,7 +67,7 @@ export function PixivLightbox({ illustration, onClose }: PixivLightboxProps) {
 
       return { previousData };
     },
-    onError: (err, illustId, context) => {
+    onError: (err, _illustId, context) => {
       // Rollback on error
       if (context?.previousData) {
         queryClient.setQueryData(['pixiv', 'daily-ranking'], context.previousData);

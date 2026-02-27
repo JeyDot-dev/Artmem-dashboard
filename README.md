@@ -1,6 +1,6 @@
-# Tora-chan Art Study Dashboard
+# Artmem Dashboard
 
-A local-first web application for tracking art curriculum progress with AI-optimized memory pack exports.
+A local-first web application for tracking learning curriculum progress with AI-optimized memory pack exports.
 
 ## Prerequisites
 
@@ -49,11 +49,12 @@ This will start both the frontend (http://localhost:5173) and backend (http://lo
 ## Project Structure
 
 ```
-tora-art-dashboard/
+artmem-dashboard/
 ├── docs/                    # Documentation
 │   ├── PRD.md              # Product Requirements Document
 │   ├── TECH.md             # Technical Stack & Architecture
-│   └── V2-FEATURES.md      # V2 Feature Specification (Dashboard, Current Task Widget)
+│   ├── DESIGN-SYSTEM.md    # V5 Design System Specification
+│   └── V2-FEATURES.md      # V2 Feature Specification (historical)
 ├── AGENTS.md               # AI coding assistant guidelines
 ├── client/                 # React frontend (Vite + React 19)
 │   ├── src/
@@ -130,7 +131,7 @@ See [docs/V2-FEATURES.md](docs/V2-FEATURES.md) for full specification.
   - 2-second pulse animation draws attention
   - Seamless navigation from widget to item
 
-### V3 Features ✨ NEW
+### V3 Features
 
 See [docs/TECH.md](docs/TECH.md) for technical specification.
 
@@ -150,7 +151,7 @@ See [docs/TECH.md](docs/TECH.md) for technical specification.
     - View on Pixiv with external link button
     - Aggressive caching strategy minimizes API requests
 
-### V3.1 Features ✨ LATEST
+### V3.1 Features
 
 - **Dashboard Search Filter**: Real-time search to quickly find curriculums
   - Searches across title, author, and platform fields simultaneously
@@ -161,12 +162,72 @@ See [docs/TECH.md](docs/TECH.md) for technical specification.
   - Shows "No matching curriculums" message when filter returns no results
   - Search persists while on dashboard view
 
+### V4 Features
+
+- **Curriculum Edit Mode**: Dedicated mode for reordering curriculum structure
+  - Drag-and-drop sections and items with physics-based animations
+  - Sections auto-collapse during drag for better visibility
+  - Neon particle burst on drop for satisfying feedback
+  - Optimistic local state with explicit Save action
+  - Unsaved changes warning on exit
+  - Floating footer with Toggle/Exit/Save controls
+
+### V5 Design System
+
+V5 is a complete visual and interaction overhaul implementing the **ZZZ-inspired "Digital Doujin"** design language. See [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) for the full specification.
+
+#### Color Palette
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `primary` | `#facc15` | Electric yellow — signature color, interactive elements |
+| `accent` | `#22d3ee` | Neon cyan — secondary highlights |
+| `accent-pink` | `#f472b6` | Hot pink — tertiary accents, Wishlist status |
+| `success` | `#34d399` | Neon green — completed states |
+| `background` | `#0a0a0f` | Void black |
+| `card` | `#111118` | Elevated surface |
+
+#### Typography
+
+- **Body font**: [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) — geometric, tech-forward
+- **Monospace font**: [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) — used for all numeric data (progress %, item counts, dates) to create a HUD/terminal aesthetic
+
+Fonts are loaded via `@fontsource/space-grotesk` and `@fontsource/jetbrains-mono` packages (no external CDN required).
+
+#### Animation System
+
+All animation constants are defined in `client/src/lib/animations.ts` and must be imported from there — never hardcode spring values inline:
+
+| Constant | Stiffness/Damping | Use case |
+|----------|-------------------|----------|
+| `tactileSpring` | 500 / 30 | Buttons, immediate feedback |
+| `bounceSpring` | 400 / 15 | Drop placement, dialogs (overshoot) |
+| `gentleSpring` | 200 / 25 | Layout shifts, page transitions |
+| `overlaySpring` | 500 / 35 | Drag overlay responsiveness |
+
+#### Key V5 Interactions
+
+- **3D cursor-tracked tilt** on dashboard curriculum cards (`CurriculumCard.tsx`)
+- **Breathing pulse** on in-progress status indicators (CSS `@keyframes breathe`)
+- **Gradient progress bar** with shimmer scan-line effect (`progress.tsx`)
+- **Neon glow** on active sidebar items and drag handles on hover
+- **`whileTap={{ scale: 0.95 }}`** on every interactive element via `Button` component
+- **Page transitions** via `AnimatePresence mode="wait"` in `App.tsx`
+- **Ring-pulse** emanating from status cycle buttons on click (`CurriculumDetail.tsx`)
+- **Neon particle burst** (`DropParticles.tsx`) on drag-and-drop in edit mode — replaces `canvas-confetti`
+- **Pulsing Save button** in `EditModeFooter` when there are unsaved changes
+
+#### Accessibility
+
+- Full `prefers-reduced-motion` support — animations collapse to near-zero duration via CSS media query
+- `DropParticles` skips rendering entirely when reduced motion is preferred
+
 ### UI Highlights
 
-- Dark mode aesthetic with soft purple/teal color scheme
-- Collapsible sidebar with status grouping
+- Void-black background with ZZZ electric yellow accent
+- Collapsible sidebar with neon active state
 - Real-time progress calculation
-- One-click status cycling for items
+- One-click status cycling for items with ring-pulse feedback
 - Drag-and-drop JSON import
 
 ## Tech Stack
@@ -174,7 +235,9 @@ See [docs/TECH.md](docs/TECH.md) for technical specification.
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | Frontend | React 19 + Vite | Modern React with latest features |
-| UI | shadcn/ui + Tailwind CSS | Beautiful, accessible components |
+| UI | shadcn/ui + Tailwind CSS | Accessible, customizable components |
+| Animations | framer-motion | Physics-based spring animations (V5) |
+| Fonts | Space Grotesk + JetBrains Mono | ZZZ "Digital Doujin" typography (V5) |
 | State | TanStack Query v5 | Server state management |
 | Backend | Node.js + Express | REST API server |
 | Database | sql.js | In-memory SQLite database |
@@ -187,12 +250,12 @@ See [docs/TECH.md](docs/TECH.md) for technical specification.
 
 When you first open the app, you'll see the **Dashboard** with all your curriculums organized by status:
 
-- **📊 Ongoing**: Currently active curriculums (expanded by default)
+- **Ongoing**: Currently active curriculums (expanded by default)
   - Shows current/next task preview
   - Sorted by nearest deadline first
-- **⏸️ Standby**: Paused curriculums  
-- **📋 Planned**: Future curriculums
-- **⭐ Wishlist**: Courses you're interested in but not ready to commit to
+- **Standby**: Paused curriculums  
+- **Planned**: Future curriculums
+- **Wishlist**: Courses you're interested in but not ready to commit to
   - Appears only on dashboard, not in sidebar
   - Perfect for tracking potential future learning paths
 
@@ -243,12 +306,13 @@ When viewing a curriculum, you'll see the **Current Task Widget** prominently di
 - Shows your active "in progress" task, or the next "not started" task
 - Displays task details and which section it belongs to
 - Click **Go to Task** to smoothly scroll to the item with a highlight animation
-- Celebrates with a 🎉 when all tasks are complete
+  - Shows a completion indicator when all tasks are complete
 
 ### Tracking Progress
 
 - Click on any item's status icon to cycle through:
-  - ☐ Not Started → ▶ In Progress → ✓ Completed
+  - Square (not started) → Play (in progress) → CheckCircle (completed)
+- Each click fires a ring-pulse animation from the button (V5)
 - Progress bars automatically update at section and curriculum levels
 - Current task widget updates in real-time
 
@@ -320,9 +384,9 @@ The Pixiv Inspiration Widget requires a Pixiv refresh token. If not configured, 
 
 **Steps to obtain a Pixiv Refresh Token:**
 
-1. Install a Pixiv authentication tool (recommended: [pixiv-auth](https://github.com/alphasp/pixiv-auth))
+1. Use [gppt](https://github.com/eggplants/get-pixivpy-token) (get-pixivpy-token) to log in and obtain a refresh token:
    ```bash
-   npx pixiv-auth login
+   gppt login
    ```
 
 2. Complete the OAuth flow in your browser

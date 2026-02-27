@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Dashboard } from './components/dashboard/Dashboard';
@@ -9,6 +10,7 @@ import { SectionForm } from './components/curriculum/SectionForm';
 import { ItemForm } from './components/curriculum/ItemForm';
 import { ImportDropzone } from './components/common/ImportDropzone';
 import * as api from './lib/api';
+import { pageTransitionProps } from './lib/animations';
 import type { Curriculum, Section, Item, ReorderRequest } from '../../shared/types';
 
 export default function App() {
@@ -190,66 +192,74 @@ export default function App() {
         />
 
         <main className="flex-1 overflow-y-auto p-6 bg-background">
-          {showImport ? (
-            <ImportDropzone onImport={handleImport} />
-          ) : selectedCurriculum ? (
-            <CurriculumDetailView
-              curriculum={selectedCurriculum}
-              onEdit={() => {
-                setEditingCurriculum(selectedCurriculum);
-                setCurriculumFormOpen(true);
-              }}
-              onDelete={() => {
-                if (confirm('Delete this curriculum? This cannot be undone.')) {
-                  deleteCurriculumMutation.mutate(selectedCurriculum.id);
-                }
-              }}
-              onAddSection={() => {
-                setEditingSection(null);
-                setSectionFormOpen(true);
-              }}
-              onEditSection={(sectionId) => {
-                const section = selectedCurriculum.sections.find((s) => s.id === sectionId);
-                if (section) {
-                  setEditingSection({ section, curriculumId: selectedCurriculum.id });
-                  setSectionFormOpen(true);
-                }
-              }}
-              onDeleteSection={(sectionId) => {
-                if (confirm('Delete this section? This cannot be undone.')) {
-                  deleteSectionMutation.mutate(sectionId);
-                }
-              }}
-              onAddItem={(sectionId) => {
-                setEditingItem({ item: {}, sectionId });
-                setItemFormOpen(true);
-              }}
-              onEditItem={(itemId) => {
-                for (const section of selectedCurriculum.sections) {
-                  const item = section.items.find((i) => i.id === itemId);
-                  if (item) {
-                    setEditingItem({ item, sectionId: section.id });
+          <AnimatePresence mode="wait">
+            {showImport ? (
+              <motion.div key="import" {...pageTransitionProps}>
+                <ImportDropzone onImport={handleImport} />
+              </motion.div>
+            ) : selectedCurriculum ? (
+              <motion.div key={`curriculum-${selectedCurriculum.id}`} {...pageTransitionProps}>
+                <CurriculumDetailView
+                  curriculum={selectedCurriculum}
+                  onEdit={() => {
+                    setEditingCurriculum(selectedCurriculum);
+                    setCurriculumFormOpen(true);
+                  }}
+                  onDelete={() => {
+                    if (confirm('Delete this curriculum? This cannot be undone.')) {
+                      deleteCurriculumMutation.mutate(selectedCurriculum.id);
+                    }
+                  }}
+                  onAddSection={() => {
+                    setEditingSection(null);
+                    setSectionFormOpen(true);
+                  }}
+                  onEditSection={(sectionId) => {
+                    const section = selectedCurriculum.sections.find((s) => s.id === sectionId);
+                    if (section) {
+                      setEditingSection({ section, curriculumId: selectedCurriculum.id });
+                      setSectionFormOpen(true);
+                    }
+                  }}
+                  onDeleteSection={(sectionId) => {
+                    if (confirm('Delete this section? This cannot be undone.')) {
+                      deleteSectionMutation.mutate(sectionId);
+                    }
+                  }}
+                  onAddItem={(sectionId) => {
+                    setEditingItem({ item: {}, sectionId });
                     setItemFormOpen(true);
-                    break;
-                  }
-                }
-              }}
-              onDeleteItem={(itemId) => {
-                if (confirm('Delete this item?')) {
-                  deleteItemMutation.mutate(itemId);
-                }
-              }}
-              onCycleItemStatus={(itemId) => cycleItemStatusMutation.mutate(itemId)}
-              onReorder={async (curriculumId, data) => {
-                await reorderCurriculumMutation.mutateAsync({ id: curriculumId, data });
-              }}
-            />
-          ) : (
-            <Dashboard
-              curriculums={curriculums}
-              onSelectCurriculum={setSelectedCurriculumId}
-            />
-          )}
+                  }}
+                  onEditItem={(itemId) => {
+                    for (const section of selectedCurriculum.sections) {
+                      const item = section.items.find((i) => i.id === itemId);
+                      if (item) {
+                        setEditingItem({ item, sectionId: section.id });
+                        setItemFormOpen(true);
+                        break;
+                      }
+                    }
+                  }}
+                  onDeleteItem={(itemId) => {
+                    if (confirm('Delete this item?')) {
+                      deleteItemMutation.mutate(itemId);
+                    }
+                  }}
+                  onCycleItemStatus={(itemId) => cycleItemStatusMutation.mutate(itemId)}
+                  onReorder={async (curriculumId, data) => {
+                    await reorderCurriculumMutation.mutateAsync({ id: curriculumId, data });
+                  }}
+                />
+              </motion.div>
+            ) : (
+              <motion.div key="dashboard" {...pageTransitionProps}>
+                <Dashboard
+                  curriculums={curriculums}
+                  onSelectCurriculum={setSelectedCurriculumId}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
 
