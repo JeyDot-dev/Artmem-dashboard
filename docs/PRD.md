@@ -12,7 +12,7 @@
 2. [Target Users](#2-target-users)
 3. [Product Vision](#3-product-vision)
 4. [Core Features](#4-core-features)
-5. [V2-V5 Features](#5-v2-v5-features)
+5. [V2-V6 Features](#5-v2-v6-features)
 6. [V4 Features - Edit Mode](#6-v4-features---curriculum-edit-mode)
 7. [User Stories](#7-user-stories)
 8. [Information Architecture](#8-information-architecture)
@@ -179,7 +179,7 @@ Icons are provided by lucide-react (no emojis).
 
 ---
 
-## 5. V2-V5 Features
+## 5. V2-V6 Features
 
 > See [V2-FEATURES.md](./V2-FEATURES.md) for detailed specification.
 
@@ -364,6 +364,21 @@ V5 is a complete visual and interaction overhaul with no new features. See [`doc
 - Animation: spring physics throughout, 3D card tilt, breathing indicators, page transitions
 - Every interactive element: `whileTap={{ scale: 0.95 }}`
 - Full `prefers-reduced-motion` accessibility support
+
+### 5.10 V6 Curriculum Notes and Series Grouping
+
+V6 adds lightweight planning context to dashboard cards and introduces visual grouping for multi-part curriculums.
+
+**Curriculum Notes:**
+- Each curriculum can store an optional short note
+- Note is shown below the progress bar on dashboard cards
+- Supports quick reminders without opening curriculum detail
+
+**Series Grouping:**
+- Curriculums can be assigned to a named series
+- Same-status curriculums in the same series are grouped in a dedicated dashboard container
+- Each curriculum can carry a part number (Part 1, Part 2, ...)
+- Optional finale indicator can mark the last part of a series
 
 ---
 
@@ -660,6 +675,16 @@ interface ReorderResponse {
 | US-37 | As a user, I want changes to only save when I explicitly click "Save" so I have full control | P1 |
 | US-38 | As a user, I want the reordering to persist after page refresh once saved | P0 |
 
+### Epic: Dashboard Notes and Series (V6)
+
+| ID | Story | Priority |
+|----|-------|----------|
+| US-39 | As a user, I want to add a note to a curriculum so I can keep short reminders visible on the dashboard | P1 |
+| US-40 | As a user, I want curriculum notes shown below the progress bar so important context is visible at a glance | P1 |
+| US-41 | As a user, I want to group related curriculums into a series so multi-part learning paths feel organized | P1 |
+| US-42 | As a user, I want to set part numbers for series curriculums so I can follow the intended order | P1 |
+| US-43 | As a user, I want a subtle finale indicator on the final series part so I can quickly see completion of a sequence | P2 |
+
 ---
 
 ## 8. Information Architecture
@@ -676,8 +701,12 @@ interface ReorderResponse {
 │ platform: string | null                                      │
 │ platformUrl: string | null                                   │
 │ description: string | null                                   │
+│ note: string | null                                          │
+│ seriesName: string | null                                    │
+│ seriesOrder: number | null                                   │
+│ isSeriesFinale: boolean | null                               │
 │ priority: 'high' | 'medium' | 'low'                         │
-│ status: 'ongoing' | 'standby' | 'planned' | 'wishlist'     │
+│ status: 'ongoing' | 'standby' | 'planned' | 'wishlist' | 'completed' │
 │ startDate: Date | null                                       │
 │ endDate: Date | null                                         │
 │ createdAt: Date                                              │
@@ -843,6 +872,7 @@ The following features are explicitly **not planned**:
 | 3.1 | Completed | Dashboard search filter (title, author, platform) |
 | 4.0 | Completed | Curriculum Edit Mode: DND reordering with physics animations |
 | 5.0 | Completed | Design system overhaul: ZZZ palette, typography, animations, DropParticles |
+| 6.0 | Completed | Curriculum notes + dashboard series grouping with part/finale indicators |
 
 ---
 

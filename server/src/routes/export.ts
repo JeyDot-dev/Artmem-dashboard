@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { db, scheduleSave } from '../db/index.js';
 import { curriculums, sections, items } from '../db/schema.js';
-import { curriculumJSONSchema } from '../../../shared/types.js';
+import { curriculumJSONSchema, type CurriculumJSON } from '../../../shared/types.js';
 
 const router = Router();
 
@@ -272,6 +272,23 @@ router.get('/export/tora', async (req, res) => {
         if (curriculumSections.length > 0) {
           markdown += `**Sections:** ${curriculumSections.map((s) => s.title).join(', ')}\n\n`;
         }
+        markdown += `---\n\n`;
+      }
+    }
+
+    // Completed curriculums - compact recap
+    const completedCurriculums = allCurriculums.filter((c) => c.status === 'completed');
+    if (completedCurriculums.length > 0) {
+      markdown += `## Completed\n\n`;
+
+      for (const curriculum of completedCurriculums) {
+        markdown += `### ${curriculum.title}\n`;
+        if (curriculum.author) markdown += `**Author:** ${curriculum.author}`;
+        if (curriculum.platform) {
+          markdown += ` | **Platform:** ${curriculum.platformUrl ? `[${curriculum.platform}](${curriculum.platformUrl})` : curriculum.platform}`;
+        }
+        if (curriculum.author || curriculum.platform) markdown += `\n`;
+        markdown += `Finished curriculum.\n\n`;
         markdown += `---\n\n`;
       }
     }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Zap, Target, CheckCircle2, Square, Play } from 'lucide-react';
+import { ExternalLink, Zap, Target, CheckCircle2, Square, Play, Library } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '../ui/progress';
 import { DaysRemaining } from './DaysRemaining';
@@ -15,6 +15,7 @@ import type {
 interface CurriculumCardProps {
   curriculum: CurriculumWithProgress;
   onClick: (id: number) => void;
+  compact?: boolean;
 }
 
 const priorityConfig: Record<CurriculumPriority, { badge: string; border: string; badgeColor: string }> = {
@@ -104,10 +105,63 @@ function TiltCard({
   );
 }
 
-export function CurriculumCard({ curriculum, onClick }: CurriculumCardProps) {
+export function CurriculumCard({ curriculum, onClick, compact = false }: CurriculumCardProps) {
   const config = priorityConfig[curriculum.priority];
 
   const handleCardClick = () => onClick(curriculum.id);
+
+  if (compact) {
+    return (
+      <TiltCard
+        role="article"
+        tabIndex={0}
+        onClick={handleCardClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
+        className="border-l-4 border-l-success bg-success/5 hover:border-success/40"
+      >
+        <div className="p-3 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-semibold text-sm line-clamp-2">
+              {curriculum.platformUrl ? (
+                <a
+                  href={curriculum.platformUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="hover:text-success hover:underline inline-flex items-center gap-1"
+                >
+                  {curriculum.title}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                curriculum.title
+              )}
+            </h3>
+            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+          </div>
+
+          {(curriculum.author || curriculum.platform) && (
+            <p className="text-xs text-muted-foreground truncate">
+              {curriculum.author && <span>{curriculum.author}</span>}
+              {curriculum.author && curriculum.platform && <span> • </span>}
+              {curriculum.platform && <span>{curriculum.platform}</span>}
+            </p>
+          )}
+
+          <p className="text-xs text-muted-foreground">
+            <span className="font-mono">{curriculum.completedItems}/{curriculum.totalItems}</span>
+            {' '}items completed{' '}
+            (<span className="font-mono">{Math.round(curriculum.progress)}%</span>)
+          </p>
+        </div>
+      </TiltCard>
+    );
+  }
 
   return (
     <TiltCard
@@ -162,6 +216,20 @@ export function CurriculumCard({ curriculum, onClick }: CurriculumCardProps) {
           )}
         </div>
 
+        {curriculum.seriesName && curriculum.seriesOrder && (
+          <div className="flex items-center gap-1.5">
+            <Library className="h-3 w-3 text-primary/50" />
+            <span className="text-xs font-mono text-primary/60">
+              Part {curriculum.seriesOrder}
+            </span>
+            {curriculum.isSeriesFinale && (
+              <span className="text-xs font-mono text-accent-pink/70 ml-1">
+                (Finale)
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Progress Bar */}
         <div>
           <Progress value={curriculum.progress} className="h-2 mb-1" />
@@ -171,6 +239,12 @@ export function CurriculumCard({ curriculum, onClick }: CurriculumCardProps) {
             (<span className="font-mono">{Math.round(curriculum.progress)}%</span>)
           </p>
         </div>
+
+        {curriculum.note && (
+          <p className="text-xs text-muted-foreground italic line-clamp-2">
+            {curriculum.note}
+          </p>
+        )}
 
         {/* Goal Date */}
         {curriculum.endDate && (
@@ -251,6 +325,20 @@ export function CurriculumCardWithTask({
           )}
         </div>
 
+        {curriculum.seriesName && curriculum.seriesOrder && (
+          <div className="flex items-center gap-1.5">
+            <Library className="h-3 w-3 text-primary/50" />
+            <span className="text-xs font-mono text-primary/60">
+              Part {curriculum.seriesOrder}
+            </span>
+            {curriculum.isSeriesFinale && (
+              <span className="text-xs font-mono text-accent-pink/70 ml-1">
+                (Finale)
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Progress Bar */}
         <div>
           <Progress value={curriculum.progress} className="h-2 mb-1" />
@@ -260,6 +348,12 @@ export function CurriculumCardWithTask({
             (<span className="font-mono">{Math.round(curriculum.progress)}%</span>)
           </p>
         </div>
+
+        {curriculum.note && (
+          <p className="text-xs text-muted-foreground italic line-clamp-2">
+            {curriculum.note}
+          </p>
+        )}
 
         {/* Goal Date */}
         {curriculum.endDate && (

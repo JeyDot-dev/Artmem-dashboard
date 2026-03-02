@@ -41,9 +41,10 @@ artmem-dashboard/
 │   │   │   │       ├── SortableSection.tsx
 │   │   │   │       ├── SortableItem.tsx
 │   │   │   │       └── DragHandle.tsx
-│   │   │   ├── dashboard/     # Dashboard components (V2/V3)
+│   │   │   ├── dashboard/     # Dashboard components (V2/V3/V6)
 │   │   │   │   ├── Dashboard.tsx
 │   │   │   │   ├── CurriculumCard.tsx
+│   │   │   │   ├── SeriesGroup.tsx      # V6: Series container for grouped cards
 │   │   │   │   ├── StatusSection.tsx
 │   │   │   │   ├── DaysRemaining.tsx
 │   │   │   │   ├── DashboardSearchBar.tsx  # V3.1: Search filter input
@@ -106,7 +107,7 @@ artmem-dashboard/
 
 #### Icons
 - **Always use lucide-react icons** - NEVER use emojis or emoticons
-- Dashboard section icons: `TrendingUp` (Ongoing), `Pause` (Standby), `ClipboardList` (Planned), `Star` (Wishlist)
+- Dashboard section icons: `TrendingUp` (Ongoing), `Pause` (Standby), `ClipboardList` (Planned), `Star` (Wishlist), `CheckCircle2` (Completed)
 - Task status icons: `Play` (in-progress), `Square` (not-started), `CheckCircle2` (completed)
 - Priority badge icon: `Zap` (lightning bolt)
 - Goal date icon: `Target` (crosshair)
@@ -269,6 +270,7 @@ Contains all shared TypeScript types and Zod validation schemas:
 - `CurriculumWithProgress` - Curriculum + computed progress
 - `CurriculumDetail` - Full curriculum with nested sections/items
 - `createCurriculumSchema`, etc. - Zod validation schemas
+- V6 curriculum metadata: `note`, `seriesName`, `seriesOrder`, `isSeriesFinale`
 
 ### API Client (`client/src/lib/api.ts`)
 
@@ -302,18 +304,18 @@ Main application orchestrator:
 Navigation sidebar with curriculum list:
 
 - Groups curriculums by status: **Ongoing, Standby, Planned only**
-- **Important**: Wishlist items are excluded from the sidebar
-- Wishlist curriculums appear only on the Dashboard view
+- **Important**: Wishlist and Completed items are excluded from the sidebar
+- Wishlist and Completed curriculums appear only on the Dashboard view
 - Collapsible sidebar with mini-mode
 - Shows curriculum title, platform, and progress percentage
 
 ```typescript
-// Sidebar status groups - Wishlist intentionally excluded
+// Sidebar status groups - Wishlist/Completed intentionally excluded
 const statusGroups: { status: CurriculumStatus; label: string }[] = [
   { status: 'ongoing', label: 'Ongoing' },
   { status: 'standby', label: 'Standby' },
   { status: 'planned', label: 'Planned' },
-  // wishlist is NOT included here - appears only on Dashboard
+  // wishlist/completed are NOT included here - appear only on Dashboard
 ];
 ```
 
@@ -467,6 +469,30 @@ V5 is a pure UX/visual upgrade — no new features.
 - **Particles**: `DropParticles` (neon dots via framer-motion, replaces removed `canvas-confetti`)
 - **Interactions**: `whileTap={{ scale: 0.95 }}` on every interactive element, 3D tilt on cards, breathing glow on in-progress items
 - **Transitions**: `AnimatePresence mode="wait"` on main content area
+
+---
+
+### V6: Curriculum Notes & Series Grouping
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `SeriesGroup` | `components/dashboard/SeriesGroup.tsx` | Responsive series container that spans columns based on group size |
+| `SeriesNameCombobox` | `components/curriculum/SeriesNameCombobox.tsx` | Searchable dropdown for series name in curriculum form — type to filter, select existing or create new |
+| `CurriculumCard` | `components/dashboard/CurriculumCard.tsx` | Shows dashboard note, part number badge, and finale indicator |
+| `Dashboard` | `components/dashboard/Dashboard.tsx` | Groups status lists into standalone cards or series groups |
+
+**Data fields (Curriculum):**
+- `note`: Optional short dashboard note shown under the progress bar
+- `seriesName`: Optional series identifier (same name groups cards)
+- `seriesOrder`: Optional positive integer used for part ordering
+- `isSeriesFinale`: Optional boolean for subtle final-part indicator
+
+**Dashboard grouping behavior:**
+- Grouping remains status-first (`ongoing`, `standby`, `planned`, `wishlist`, `completed`)
+- Within each status, entries are split into standalone cards or `SeriesGroup` containers
+- Cards inside a series are ordered by `seriesOrder` ascending
+- Single-item "series" are rendered as standalone cards to avoid wasted grid space
+- `completed` cards use a compact dashboard variant (smaller card, reduced metadata)
 
 ---
 

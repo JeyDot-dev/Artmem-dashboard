@@ -107,12 +107,13 @@ artmem-dashboard/
 
 See [docs/V2-FEATURES.md](docs/V2-FEATURES.md) for full specification.
 
-- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned, Wishlist)
+- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned, Wishlist, Completed)
   - Cards sorted by deadline (nearest first)
   - Visual priority badges and progress bars
   - Current task preview on ongoing curriculums
   - Responsive grid layout
-  - **Note**: Wishlist items appear only on the dashboard, not in the sidebar
+  - **Note**: Wishlist and Completed items appear only on the dashboard, not in the sidebar
+  - Completed cards are intentionally compact (smaller footprint, reduced metadata) to keep finished work visible but de-emphasized
 
 - **Days Remaining**: Smart countdown display showing days until goal date
   - Color-coded urgency: green (>30 days), yellow (8-30 days), red (≤7 days)
@@ -222,6 +223,20 @@ All animation constants are defined in `client/src/lib/animations.ts` and must b
 - Full `prefers-reduced-motion` support — animations collapse to near-zero duration via CSS media query
 - `DropParticles` skips rendering entirely when reduced motion is preferred
 
+### V6 Features
+
+- **Curriculum Notes on Dashboard Cards**:
+  - Add an optional note per curriculum in the create/edit form
+  - Displayed directly below each card progress bar
+  - Truncated to keep cards compact and readable
+
+- **Curriculum Series Grouping**:
+  - Assign curriculums to a series using `seriesName`
+  - Set course order with `seriesOrder` (Part 1, Part 2, etc.)
+  - Optionally mark the final entry with `isSeriesFinale`
+  - Dashboard groups same-status series in a neon-accented container that spans only the columns it needs
+  - Cards show subtle series indicators: part number and optional finale marker
+
 ### UI Highlights
 
 - Void-black background with ZZZ electric yellow accent
@@ -262,7 +277,8 @@ When you first open the app, you'll see the **Dashboard** with all your curricul
 **Features:**
 - Click any card to open the full curriculum view
 - External links open in new tabs
-- Cards show priority, days remaining, progress, and goal date
+- Cards show priority, days remaining, progress, optional notes, and goal date
+- Series curriculums are grouped in dedicated dashboard containers and labeled by part number
 
 ### Searching the Dashboard (V3.1)
 
@@ -283,8 +299,10 @@ Use the **Search Bar** at the top of the dashboard to quickly find curriculums:
 1. Click the **+** button in the sidebar
 2. Fill in curriculum details (title, author, platform, etc.)
 3. Set priority (High/Medium/Low) and status (Ongoing/Standby/Planned/Wishlist)
-4. Optionally set a goal end date to enable days remaining countdown
-5. Click **Create**
+4. Optionally add a **Dashboard Note** for quick reminders shown on the dashboard card
+5. Optionally configure a **Series** (name, part number, and final-part flag)
+6. Optionally set a goal end date to enable days remaining countdown
+7. Click **Create**
 
 **Status Options:**
 - **Ongoing**: Currently studying

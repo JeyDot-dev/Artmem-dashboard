@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from './components/layout/Sidebar';
@@ -32,6 +32,12 @@ export default function App() {
     queryKey: ['curriculums'],
     queryFn: api.getCurriculums,
   });
+
+  const existingSeriesNames = useMemo(
+    () =>
+      [...new Set(curriculums.map((c) => c.seriesName).filter(Boolean))].sort() as string[],
+    [curriculums]
+  );
 
   const { data: selectedCurriculum } = useQuery({
     queryKey: ['curriculum', selectedCurriculumId],
@@ -277,6 +283,7 @@ export default function App() {
           }
         }}
         initialData={editingCurriculum || undefined}
+        existingSeriesNames={existingSeriesNames}
       />
 
       <SectionForm

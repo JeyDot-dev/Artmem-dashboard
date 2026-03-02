@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, TrendingUp, Pause, ClipboardList, Star } from 'lucide-react';
+import { ChevronDown, TrendingUp, Pause, ClipboardList, Star, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { tactileSpring, gentleSpring } from '@/lib/animations';
@@ -35,6 +35,11 @@ const statusConfig: Record<
     icon: Star,
     label: 'Wishlist',
     color: 'text-accent-pink',
+  },
+  completed: {
+    icon: CheckCircle2,
+    label: 'Completed',
+    color: 'text-success',
   },
 };
 

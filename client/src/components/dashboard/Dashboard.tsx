@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StatusSection } from './StatusSection';
 import { CurriculumCard, CurriculumCardWithTask } from './CurriculumCard';
+import { SeriesGroup } from './SeriesGroup';
 import { DashboardHeaderRow } from './DashboardHeaderRow';
 import { DashboardSearchBar } from './DashboardSearchBar';
 import { getDaysRemaining, filterCurriculums } from '../../lib/utils';
@@ -11,6 +12,65 @@ import type { CurriculumWithProgress, CurriculumStatus } from '../../../../share
 interface DashboardProps {
   curriculums: CurriculumWithProgress[];
   onSelectCurriculum: (id: number) => void;
+}
+
+type DashboardEntry =
+  | { type: 'standalone'; curriculum: CurriculumWithProgress }
+  | { type: 'series'; seriesName: string; curriculums: CurriculumWithProgress[] };
+
+function groupBySeriesForDashboard(curriculums: CurriculumWithProgress[]): DashboardEntry[] {
+  const entries: DashboardEntry[] = [];
+  const seriesMap = new Map<string, { type: 'series'; seriesName: string; curriculums: CurriculumWithProgress[] }>();
+
+  curriculums.forEach((curriculum) => {
+    if (!curriculum.seriesName) {
+      entries.push({ type: 'standalone', curriculum });
+      return;
+    }
+
+    const existingSeries = seriesMap.get(curriculum.seriesName);
+    if (existingSeries) {
+      existingSeries.curriculums.push(curriculum);
+      return;
+    }
+
+    const newSeriesEntry = {
+      type: 'series' as const,
+      seriesName: curriculum.seriesName,
+      curriculums: [curriculum],
+    };
+
+    seriesMap.set(curriculum.seriesName, newSeriesEntry);
+    entries.push(newSeriesEntry);
+  });
+
+  const normalizedEntries: DashboardEntry[] = [];
+
+  for (const entry of entries) {
+    if (entry.type === 'standalone') {
+      normalizedEntries.push(entry);
+      continue;
+    }
+
+    const sortedCurriculums = [...entry.curriculums].sort((a, b) => {
+      const orderA = a.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
+
+    // A "series" with one item should render as a normal card.
+    if (sortedCurriculums.length <= 1) {
+      normalizedEntries.push({ type: 'standalone', curriculum: sortedCurriculums[0] });
+      continue;
+    }
+
+    normalizedEntries.push({
+      ...entry,
+      curriculums: sortedCurriculums,
+    });
+  }
+
+  return normalizedEntries;
 }
 
 export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
@@ -25,6 +85,7 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
     standby: [],
     planned: [],
     wishlist: [],
+    completed: [],
   };
   
   filteredCurriculums.forEach((curriculum) => {
@@ -48,6 +109,14 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
       return daysA - daysB;
     });
   });
+
+  const groupedDashboardEntries: Record<CurriculumStatus, DashboardEntry[]> = {
+    ongoing: groupBySeriesForDashboard(groupedByStatus.ongoing),
+    standby: groupBySeriesForDashboard(groupedByStatus.standby),
+    planned: groupBySeriesForDashboard(groupedByStatus.planned),
+    wishlist: groupBySeriesForDashboard(groupedByStatus.wishlist),
+    completed: groupBySeriesForDashboard(groupedByStatus.completed),
+  };
   
   return (
     <div className="space-y-6">
@@ -71,13 +140,24 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
           count={groupedByStatus.ongoing.length}
           defaultExpanded={true}
         >
-          {groupedByStatus.ongoing.map((curriculum) => (
-            <OngoingCard
-              key={curriculum.id}
-              curriculum={curriculum}
-              onClick={onSelectCurriculum}
-            />
-          ))}
+          {groupedDashboardEntries.ongoing.map((entry) =>
+            entry.type === 'series' ? (
+              <SeriesGroup
+                key={`series-ongoing-${entry.seriesName}`}
+                seriesName={entry.seriesName}
+                curriculums={entry.curriculums}
+                renderCard={(curriculum) => (
+                  <OngoingCard curriculum={curriculum} onClick={onSelectCurriculum} />
+                )}
+              />
+            ) : (
+              <OngoingCard
+                key={entry.curriculum.id}
+                curriculum={entry.curriculum}
+                onClick={onSelectCurriculum}
+              />
+            )
+          )}
         </StatusSection>
       )}
       
@@ -88,13 +168,24 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
           count={groupedByStatus.standby.length}
           defaultExpanded={false}
         >
-          {groupedByStatus.standby.map((curriculum) => (
-            <CurriculumCard
-              key={curriculum.id}
-              curriculum={curriculum}
-              onClick={onSelectCurriculum}
-            />
-          ))}
+          {groupedDashboardEntries.standby.map((entry) =>
+            entry.type === 'series' ? (
+              <SeriesGroup
+                key={`series-standby-${entry.seriesName}`}
+                seriesName={entry.seriesName}
+                curriculums={entry.curriculums}
+                renderCard={(curriculum) => (
+                  <CurriculumCard curriculum={curriculum} onClick={onSelectCurriculum} />
+                )}
+              />
+            ) : (
+              <CurriculumCard
+                key={entry.curriculum.id}
+                curriculum={entry.curriculum}
+                onClick={onSelectCurriculum}
+              />
+            )
+          )}
         </StatusSection>
       )}
       
@@ -105,13 +196,24 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
           count={groupedByStatus.planned.length}
           defaultExpanded={false}
         >
-          {groupedByStatus.planned.map((curriculum) => (
-            <CurriculumCard
-              key={curriculum.id}
-              curriculum={curriculum}
-              onClick={onSelectCurriculum}
-            />
-          ))}
+          {groupedDashboardEntries.planned.map((entry) =>
+            entry.type === 'series' ? (
+              <SeriesGroup
+                key={`series-planned-${entry.seriesName}`}
+                seriesName={entry.seriesName}
+                curriculums={entry.curriculums}
+                renderCard={(curriculum) => (
+                  <CurriculumCard curriculum={curriculum} onClick={onSelectCurriculum} />
+                )}
+              />
+            ) : (
+              <CurriculumCard
+                key={entry.curriculum.id}
+                curriculum={entry.curriculum}
+                onClick={onSelectCurriculum}
+              />
+            )
+          )}
         </StatusSection>
       )}
       
@@ -122,13 +224,53 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
           count={groupedByStatus.wishlist.length}
           defaultExpanded={false}
         >
-          {groupedByStatus.wishlist.map((curriculum) => (
-            <CurriculumCard
-              key={curriculum.id}
-              curriculum={curriculum}
-              onClick={onSelectCurriculum}
-            />
-          ))}
+          {groupedDashboardEntries.wishlist.map((entry) =>
+            entry.type === 'series' ? (
+              <SeriesGroup
+                key={`series-wishlist-${entry.seriesName}`}
+                seriesName={entry.seriesName}
+                curriculums={entry.curriculums}
+                renderCard={(curriculum) => (
+                  <CurriculumCard curriculum={curriculum} onClick={onSelectCurriculum} />
+                )}
+              />
+            ) : (
+              <CurriculumCard
+                key={entry.curriculum.id}
+                curriculum={entry.curriculum}
+                onClick={onSelectCurriculum}
+              />
+            )
+          )}
+        </StatusSection>
+      )}
+
+      {/* Completed Section */}
+      {groupedByStatus.completed.length > 0 && (
+        <StatusSection
+          status="completed"
+          count={groupedByStatus.completed.length}
+          defaultExpanded={false}
+        >
+          {groupedDashboardEntries.completed.map((entry) =>
+            entry.type === 'series' ? (
+              <SeriesGroup
+                key={`series-completed-${entry.seriesName}`}
+                seriesName={entry.seriesName}
+                curriculums={entry.curriculums}
+                renderCard={(curriculum) => (
+                  <CurriculumCard curriculum={curriculum} onClick={onSelectCurriculum} compact />
+                )}
+              />
+            ) : (
+              <CurriculumCard
+                key={entry.curriculum.id}
+                curriculum={entry.curriculum}
+                onClick={onSelectCurriculum}
+                compact
+              />
+            )
+          )}
         </StatusSection>
       )}
       

@@ -191,6 +191,27 @@ The V5 design system is fully documented in [`docs/DESIGN-SYSTEM.md`](./DESIGN-S
 - Tailwind CSS for styling
 - **V5**: All interactive elements use framer-motion `whileTap={{ scale: 0.95 }}`
 
+### Dashboard Notes & Series (V6)
+
+V6 introduces two dashboard-specific metadata features on curriculums:
+
+- `note`: optional short text rendered below progress bars on dashboard cards
+- Series metadata:
+  - `seriesName`: shared identifier for grouped curriculums
+  - `seriesOrder`: part number used for in-series ordering
+  - `isSeriesFinale`: optional final-part indicator
+
+Dashboard rendering flow:
+1. Filter curriculums by search query
+2. Group by status (`ongoing`, `standby`, `planned`, `wishlist`, `completed`)
+3. Sort each status group by days remaining
+4. Convert each status group into mixed dashboard entries:
+   - standalone cards
+   - responsive series containers (`SeriesGroup`) that span columns based on item count
+5. Sort cards inside each series by `seriesOrder`
+6. Render single-item series as standalone cards
+7. Render `completed` entries in a compact card variant with reduced metadata
+
 ---
 
 ## 4. Backend Architecture
@@ -265,12 +286,16 @@ export const curriculums = sqliteTable('curriculums', {
   platform: text('platform'),
   platformUrl: text('platform_url'),
   description: text('description'),
+  note: text('note'),
+  seriesName: text('series_name'),
+  seriesOrder: integer('series_order'),
+  isSeriesFinale: integer('is_series_finale', { mode: 'boolean' }),
   priority: text('priority').notNull().default('medium'),
-  status: text('status').notNull().default('planned'),  // 'ongoing' | 'standby' | 'planned' | 'wishlist'
-  startDate: text('start_date'),
-  endDate: text('end_date'),
-  createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
+  status: text('status').notNull().default('planned'),  // 'ongoing' | 'standby' | 'planned' | 'wishlist' | 'completed'
+  startDate: integer('start_date', { mode: 'timestamp' }),
+  endDate: integer('end_date', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });
 
 export const sections = sqliteTable('sections', {

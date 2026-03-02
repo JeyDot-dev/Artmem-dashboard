@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Enums
-export const curriculumStatusSchema = z.enum(['ongoing', 'standby', 'planned', 'wishlist']);
+export const curriculumStatusSchema = z.enum(['ongoing', 'standby', 'planned', 'wishlist', 'completed']);
 export const curriculumPrioritySchema = z.enum(['high', 'medium', 'low']);
 export const itemTypeSchema = z.enum(['video', 'reading', 'exercise', 'homework', 'other']);
 export const itemStatusSchema = z.enum(['not_started', 'in_progress', 'completed']);
@@ -19,6 +19,10 @@ export interface Curriculum {
   platform: string | null;
   platformUrl: string | null;
   description: string | null;
+  note: string | null;
+  seriesName: string | null;
+  seriesOrder: number | null;
+  isSeriesFinale: boolean | null;
   priority: CurriculumPriority;
   status: CurriculumStatus;
   startDate: Date | null;
@@ -99,6 +103,10 @@ export const createCurriculumSchema = z.object({
   platform: z.string().nullish(),
   platformUrl: z.string().url().nullish().or(z.literal('')),
   description: z.string().nullish(),
+  note: z.string().nullish(),
+  seriesName: z.string().nullish(),
+  seriesOrder: z.number().int().positive().nullish(),
+  isSeriesFinale: z.boolean().nullish(),
   priority: curriculumPrioritySchema.default('medium'),
   status: curriculumStatusSchema.default('planned'),
   startDate: z.preprocess((val: unknown) => {

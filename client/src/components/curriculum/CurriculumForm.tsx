@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
+import { SeriesNameCombobox } from './SeriesNameCombobox';
 import { Curriculum, CurriculumPriority, CurriculumStatus } from '../../../../shared/types';
 
 interface CurriculumFormProps {
@@ -11,15 +12,20 @@ interface CurriculumFormProps {
   onClose: () => void;
   onSubmit: (data: Partial<Curriculum>) => void;
   initialData?: Partial<Curriculum>;
+  existingSeriesNames?: string[];
 }
 
-export function CurriculumForm({ open, onClose, onSubmit, initialData }: CurriculumFormProps) {
+export function CurriculumForm({ open, onClose, onSubmit, initialData, existingSeriesNames = [] }: CurriculumFormProps) {
   const [formData, setFormData] = useState<Partial<Curriculum>>({
     title: '',
     author: '',
     platform: '',
     platformUrl: '',
     description: '',
+    note: '',
+    seriesName: '',
+    seriesOrder: null,
+    isSeriesFinale: false,
     priority: 'medium',
     status: 'planned',
     startDate: null,
@@ -60,6 +66,10 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
           platform: initialData.platform || '',
           platformUrl: initialData.platformUrl || '',
           description: initialData.description || '',
+          note: initialData.note || '',
+          seriesName: initialData.seriesName || '',
+          seriesOrder: initialData.seriesOrder || null,
+          isSeriesFinale: initialData.isSeriesFinale || false,
           priority: initialData.priority || 'medium',
           status: initialData.status || 'planned',
           startDate: initialData.startDate || null,
@@ -73,6 +83,10 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
           platform: '',
           platformUrl: '',
           description: '',
+          note: '',
+          seriesName: '',
+          seriesOrder: null,
+          isSeriesFinale: false,
           priority: 'medium',
           status: 'planned',
           startDate: null,
@@ -92,6 +106,10 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
       platform: formData.platform || null,
       platformUrl: formData.platformUrl || null,
       description: formData.description || null,
+      note: formData.note || null,
+      seriesName: formData.seriesName || null,
+      seriesOrder: formData.seriesName ? formData.seriesOrder || null : null,
+      isSeriesFinale: formData.seriesName ? formData.isSeriesFinale || false : null,
       // Ensure dates are properly handled
       startDate: formData.startDate || null,
       endDate: formData.endDate || null,
@@ -157,6 +175,16 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
               />
             </div>
 
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Dashboard Note</label>
+              <Textarea
+                value={formData.note || ''}
+                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                placeholder="Short note shown on the dashboard card..."
+                rows={2}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Priority</label>
@@ -180,8 +208,67 @@ export function CurriculumForm({ open, onClose, onSubmit, initialData }: Curricu
                   <option value="standby">Standby</option>
                   <option value="planned">Planned</option>
                   <option value="wishlist">Wishlist</option>
+                  <option value="completed">Completed</option>
                 </Select>
               </div>
+            </div>
+
+            <div className="border border-border rounded-lg p-3 space-y-3">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+                Series (optional)
+              </p>
+
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Series Name</label>
+                <SeriesNameCombobox
+                  value={formData.seriesName || ''}
+                  onChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      seriesName: value,
+                      seriesOrder: value ? formData.seriesOrder : null,
+                      isSeriesFinale: value ? formData.isSeriesFinale : false,
+                    })
+                  }
+                  existingSeriesNames={existingSeriesNames}
+                  placeholder="e.g., Figure Drawing"
+                />
+              </div>
+
+              {formData.seriesName && (
+                <div className="grid grid-cols-2 gap-4 items-end">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Part Number</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={formData.seriesOrder ?? ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          seriesOrder: e.target.value ? Number(e.target.value) : null,
+                        })
+                      }
+                      placeholder="1"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm font-medium h-10">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(formData.isSeriesFinale)}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          isSeriesFinale: e.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 rounded border-border bg-background accent-primary"
+                    />
+                    This is the final part
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
