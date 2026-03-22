@@ -54,6 +54,7 @@ const statusColors: Record<string, string> = {
   planned: 'text-accent bg-accent/10',
   wishlist: 'text-accent-pink bg-accent-pink/10',
   completed: 'text-success bg-success/10',
+  dropped: 'text-destructive bg-destructive/10',
 };
 
 /** Status cycle button with ring-pulse animation on click */

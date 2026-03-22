@@ -107,7 +107,7 @@ artmem-dashboard/
 
 #### Icons
 - **Always use lucide-react icons** - NEVER use emojis or emoticons
-- Dashboard section icons: `TrendingUp` (Ongoing), `Pause` (Standby), `ClipboardList` (Planned), `Star` (Wishlist), `CheckCircle2` (Completed)
+- Dashboard section icons: `TrendingUp` (Ongoing), `Pause` (Standby), `ClipboardList` (Planned), `Star` (Wishlist), `CheckCircle2` (Completed), `CircleOff` (Dropped)
 - Task status icons: `Play` (in-progress), `Square` (not-started), `CheckCircle2` (completed)
 - Priority badge icon: `Zap` (lightning bolt)
 - Goal date icon: `Target` (crosshair)
@@ -310,12 +310,12 @@ Navigation sidebar with curriculum list:
 - Shows curriculum title, platform, and progress percentage
 
 ```typescript
-// Sidebar status groups - Wishlist/Completed intentionally excluded
+// Sidebar status groups - Wishlist/Completed/Dropped intentionally excluded
 const statusGroups: { status: CurriculumStatus; label: string }[] = [
   { status: 'ongoing', label: 'Ongoing' },
   { status: 'standby', label: 'Standby' },
   { status: 'planned', label: 'Planned' },
-  // wishlist/completed are NOT included here - appear only on Dashboard
+  // wishlist/completed/dropped are NOT included here - appear only on Dashboard
 ];
 ```
 
@@ -488,11 +488,11 @@ V5 is a pure UX/visual upgrade — no new features.
 - `isSeriesFinale`: Optional boolean for subtle final-part indicator
 
 **Dashboard grouping behavior:**
-- Grouping remains status-first (`ongoing`, `standby`, `planned`, `wishlist`, `completed`)
+- Grouping remains status-first (`ongoing`, `standby`, `planned`, `wishlist`, `completed`, `dropped`)
 - Within each status, entries are split into standalone cards or `SeriesGroup` containers
 - Cards inside a series are ordered by `seriesOrder` ascending
 - Single-item "series" are rendered as standalone cards to avoid wasted grid space
-- `completed` cards use a compact dashboard variant (smaller card, reduced metadata)
+- `completed` and `dropped` cards use a compact dashboard variant (smaller card, reduced metadata)
 
 ---
 
@@ -598,7 +598,7 @@ cd shared && pnpm build
 | `--accent` | `#22d3ee` | Neon cyan — secondary highlights, planned status |
 | `--accent-pink` | `#f472b6` | Hot pink — tertiary accents, wishlist status |
 | `--success` | `#34d399` | Neon green — completed states |
-| `--destructive` | `#ef4444` | Neon red — delete, errors, urgent |
+| `--destructive` | `#ef4444` | Neon red — dropped status, delete, errors, urgent |
 | `--muted` | `#3f3f50` | Disabled, placeholder |
 
 ---

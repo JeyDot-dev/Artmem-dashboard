@@ -188,7 +188,7 @@ Icons are provided by lucide-react (no emojis).
 Replace the static welcome message with an interactive dashboard showing all curricula as cards.
 
 **Key Features:**
-- Cards grouped by status (Ongoing → Standby → Planned → Wishlist)
+- Cards grouped by status (Ongoing → Standby → Planned → Wishlist → Completed → Dropped)
 - Sorted by end goal date within each group
 - Visual progress indicators
 - Click to navigate to full view
@@ -706,7 +706,7 @@ interface ReorderResponse {
 │ seriesOrder: number | null                                   │
 │ isSeriesFinale: boolean | null                               │
 │ priority: 'high' | 'medium' | 'low'                         │
-│ status: 'ongoing' | 'standby' | 'planned' | 'wishlist' | 'completed' │
+│ status: 'ongoing' | 'standby' | 'planned' | 'wishlist' | 'completed' | 'dropped' │
 │ startDate: Date | null                                       │
 │ endDate: Date | null                                         │
 │ createdAt: Date                                              │

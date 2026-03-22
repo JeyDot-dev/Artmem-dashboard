@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Zap, Target, CheckCircle2, Square, Play, Library } from 'lucide-react';
+import { ExternalLink, Zap, Target, CheckCircle2, Square, Play, Library, CircleOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '../ui/progress';
 import { DaysRemaining } from './DaysRemaining';
@@ -111,6 +111,15 @@ export function CurriculumCard({ curriculum, onClick, compact = false }: Curricu
   const handleCardClick = () => onClick(curriculum.id);
 
   if (compact) {
+    const isDropped = curriculum.status === 'dropped';
+    const compactCardClass = isDropped
+      ? 'border-l-4 border-l-destructive bg-destructive/5 hover:border-destructive/40'
+      : 'border-l-4 border-l-success bg-success/5 hover:border-success/40';
+    const compactLinkHoverClass = isDropped ? 'hover:text-destructive' : 'hover:text-success';
+    const compactIcon = isDropped
+      ? <CircleOff className="h-4 w-4 text-destructive shrink-0" />
+      : <CheckCircle2 className="h-4 w-4 text-success shrink-0" />;
+
     return (
       <TiltCard
         role="article"
@@ -122,7 +131,7 @@ export function CurriculumCard({ curriculum, onClick, compact = false }: Curricu
             handleCardClick();
           }
         }}
-        className="border-l-4 border-l-success bg-success/5 hover:border-success/40"
+        className={compactCardClass}
       >
         <div className="p-3 space-y-2">
           <div className="flex items-start justify-between gap-2">
@@ -133,7 +142,7 @@ export function CurriculumCard({ curriculum, onClick, compact = false }: Curricu
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="hover:text-success hover:underline inline-flex items-center gap-1"
+                  className={cn(compactLinkHoverClass, 'hover:underline inline-flex items-center gap-1')}
                 >
                   {curriculum.title}
                   <ExternalLink className="h-3 w-3" />
@@ -142,7 +151,7 @@ export function CurriculumCard({ curriculum, onClick, compact = false }: Curricu
                 curriculum.title
               )}
             </h3>
-            <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+            {compactIcon}
           </div>
 
           {(curriculum.author || curriculum.platform) && (

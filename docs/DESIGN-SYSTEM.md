@@ -146,6 +146,7 @@ Update all status-based color references:
 | `planned` | `border-l-accent` | `bg-accent/5` | `text-accent` | `shadow-accent/10` |
 | `wishlist` | `border-l-accent-pink` | `bg-accent-pink/5` | `text-accent-pink` | `shadow-accent-pink/10` |
 | `completed` | `border-l-success` | `bg-success/5` | `text-success` | `shadow-success/10` |
+| `dropped` | `border-l-destructive` | `bg-destructive/5` | `text-destructive` | `shadow-destructive/10` |
 
 ### Priority Color Mapping
 

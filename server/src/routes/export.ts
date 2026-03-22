@@ -293,6 +293,23 @@ router.get('/export/tora', async (req, res) => {
       }
     }
 
+    // Dropped curriculums - compact recap
+    const droppedCurriculums = allCurriculums.filter((c) => c.status === 'dropped');
+    if (droppedCurriculums.length > 0) {
+      markdown += `## Dropped\n\n`;
+
+      for (const curriculum of droppedCurriculums) {
+        markdown += `### ${curriculum.title}\n`;
+        if (curriculum.author) markdown += `**Author:** ${curriculum.author}`;
+        if (curriculum.platform) {
+          markdown += ` | **Platform:** ${curriculum.platformUrl ? `[${curriculum.platform}](${curriculum.platformUrl})` : curriculum.platform}`;
+        }
+        if (curriculum.author || curriculum.platform) markdown += `\n`;
+        markdown += `Dropped curriculum.\n\n`;
+        markdown += `---\n\n`;
+      }
+    }
+
     // Export as plain text markdown file
     const timestamp = format(new Date(), 'yyyy-MM-dd');
     res.setHeader('Content-Type', 'text/markdown; charset=utf-8');

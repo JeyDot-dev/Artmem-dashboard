@@ -107,13 +107,14 @@ artmem-dashboard/
 
 See [docs/V2-FEATURES.md](docs/V2-FEATURES.md) for full specification.
 
-- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned, Wishlist, Completed)
+- **Dashboard/Home View**: Beautiful at-a-glance overview with curriculum cards organized by status (Ongoing, Standby, Planned, Wishlist, Completed, Dropped)
   - Cards sorted by deadline (nearest first)
   - Visual priority badges and progress bars
   - Current task preview on ongoing curriculums
   - Responsive grid layout
-  - **Note**: Wishlist and Completed items appear only on the dashboard, not in the sidebar
+  - **Note**: Wishlist, Completed, and Dropped items appear only on the dashboard, not in the sidebar
   - Completed cards are intentionally compact (smaller footprint, reduced metadata) to keep finished work visible but de-emphasized
+  - Dropped cards use the same compact size as Completed with a distinct dropped visual style
 
 - **Days Remaining**: Smart countdown display showing days until goal date
   - Color-coded urgency: green (>30 days), yellow (8-30 days), red (≤7 days)
@@ -185,6 +186,7 @@ V5 is a complete visual and interaction overhaul implementing the **ZZZ-inspired
 | `accent` | `#22d3ee` | Neon cyan — secondary highlights |
 | `accent-pink` | `#f472b6` | Hot pink — tertiary accents, Wishlist status |
 | `success` | `#34d399` | Neon green — completed states |
+| `destructive` | `#ef4444` | Neon red — dropped status and destructive actions |
 | `background` | `#0a0a0f` | Void black |
 | `card` | `#111118` | Elevated surface |
 
@@ -273,6 +275,8 @@ When you first open the app, you'll see the **Dashboard** with all your curricul
 - **Wishlist**: Courses you're interested in but not ready to commit to
   - Appears only on dashboard, not in sidebar
   - Perfect for tracking potential future learning paths
+- **Completed**: Finished curriculums shown as compact cards
+- **Dropped**: Abandoned curriculums shown as compact cards under Completed
 
 **Features:**
 - Click any card to open the full curriculum view
@@ -298,7 +302,7 @@ Use the **Search Bar** at the top of the dashboard to quickly find curriculums:
 
 1. Click the **+** button in the sidebar
 2. Fill in curriculum details (title, author, platform, etc.)
-3. Set priority (High/Medium/Low) and status (Ongoing/Standby/Planned/Wishlist)
+3. Set priority (High/Medium/Low) and status (Ongoing/Standby/Planned/Wishlist/Completed/Dropped)
 4. Optionally add a **Dashboard Note** for quick reminders shown on the dashboard card
 5. Optionally configure a **Series** (name, part number, and final-part flag)
 6. Optionally set a goal end date to enable days remaining countdown
@@ -309,6 +313,8 @@ Use the **Search Bar** at the top of the dashboard to quickly find curriculums:
 - **Standby**: Temporarily paused
 - **Planned**: Scheduled to start soon
 - **Wishlist**: Interested but not committed (dashboard-only)
+- **Completed**: Finished curriculum (dashboard-only compact card)
+- **Dropped**: Abandoned curriculum (dashboard-only compact card)
 
 ### Adding Sections and Items
 

@@ -170,6 +170,7 @@ The V5 design system is fully documented in [`docs/DESIGN-SYSTEM.md`](./DESIGN-S
 | `accent` | `#22d3ee` | Neon cyan - secondary highlights |
 | `accent-pink` | `#f472b6` | Hot pink - tertiary accents |
 | `success` | `#34d399` | Neon green - completed states |
+| `destructive` | `#ef4444` | Neon red - dropped states and destructive actions |
 | `background` | `#0a0a0f` | Void black |
 | `card` | `#111118` | Elevated surface |
 
@@ -203,14 +204,14 @@ V6 introduces two dashboard-specific metadata features on curriculums:
 
 Dashboard rendering flow:
 1. Filter curriculums by search query
-2. Group by status (`ongoing`, `standby`, `planned`, `wishlist`, `completed`)
+2. Group by status (`ongoing`, `standby`, `planned`, `wishlist`, `completed`, `dropped`)
 3. Sort each status group by days remaining
 4. Convert each status group into mixed dashboard entries:
    - standalone cards
    - responsive series containers (`SeriesGroup`) that span columns based on item count
 5. Sort cards inside each series by `seriesOrder`
 6. Render single-item series as standalone cards
-7. Render `completed` entries in a compact card variant with reduced metadata
+7. Render `completed` and `dropped` entries in a compact card variant with reduced metadata
 
 ---
 
@@ -291,7 +292,7 @@ export const curriculums = sqliteTable('curriculums', {
   seriesOrder: integer('series_order'),
   isSeriesFinale: integer('is_series_finale', { mode: 'boolean' }),
   priority: text('priority').notNull().default('medium'),
-  status: text('status').notNull().default('planned'),  // 'ongoing' | 'standby' | 'planned' | 'wishlist' | 'completed'
+  status: text('status').notNull().default('planned'),  // 'ongoing' | 'standby' | 'planned' | 'wishlist' | 'completed' | 'dropped'
   startDate: integer('start_date', { mode: 'timestamp' }),
   endDate: integer('end_date', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),

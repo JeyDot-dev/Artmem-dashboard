@@ -86,6 +86,7 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
     planned: [],
     wishlist: [],
     completed: [],
+    dropped: [],
   };
   
   filteredCurriculums.forEach((curriculum) => {
@@ -116,6 +117,7 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
     planned: groupBySeriesForDashboard(groupedByStatus.planned),
     wishlist: groupBySeriesForDashboard(groupedByStatus.wishlist),
     completed: groupBySeriesForDashboard(groupedByStatus.completed),
+    dropped: groupBySeriesForDashboard(groupedByStatus.dropped),
   };
   
   return (
@@ -256,6 +258,35 @@ export function Dashboard({ curriculums, onSelectCurriculum }: DashboardProps) {
             entry.type === 'series' ? (
               <SeriesGroup
                 key={`series-completed-${entry.seriesName}`}
+                seriesName={entry.seriesName}
+                curriculums={entry.curriculums}
+                renderCard={(curriculum) => (
+                  <CurriculumCard curriculum={curriculum} onClick={onSelectCurriculum} compact />
+                )}
+              />
+            ) : (
+              <CurriculumCard
+                key={entry.curriculum.id}
+                curriculum={entry.curriculum}
+                onClick={onSelectCurriculum}
+                compact
+              />
+            )
+          )}
+        </StatusSection>
+      )}
+
+      {/* Dropped Section */}
+      {groupedByStatus.dropped.length > 0 && (
+        <StatusSection
+          status="dropped"
+          count={groupedByStatus.dropped.length}
+          defaultExpanded={false}
+        >
+          {groupedDashboardEntries.dropped.map((entry) =>
+            entry.type === 'series' ? (
+              <SeriesGroup
+                key={`series-dropped-${entry.seriesName}`}
                 seriesName={entry.seriesName}
                 curriculums={entry.curriculums}
                 renderCard={(curriculum) => (

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Enums
-export const curriculumStatusSchema = z.enum(['ongoing', 'standby', 'planned', 'wishlist', 'completed']);
+export const curriculumStatusSchema = z.enum(['ongoing', 'standby', 'planned', 'wishlist', 'completed', 'dropped']);
 export const curriculumPrioritySchema = z.enum(['high', 'medium', 'low']);
 export const itemTypeSchema = z.enum(['video', 'reading', 'exercise', 'homework', 'other']);
 export const itemStatusSchema = z.enum(['not_started', 'in_progress', 'completed']);
